@@ -185,7 +185,7 @@
         <section class="py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <h3 class="text-3xl font-serif font-bold text-gray-900 mb-4">Leadership Team</h3>
+                    <h3 class="text-3xl font-serif font-bold text-gray-900 mb-4 animate-fade-in">Leadership Team</h3>
                     <p class="text-xl text-gray-600">Tim eksekutif yang memimpin inovasi pendidikan</p>
                 </div>
 

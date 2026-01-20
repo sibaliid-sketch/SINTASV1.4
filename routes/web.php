@@ -50,14 +50,24 @@ Route::get('/sitra', [SitraController::class, 'index'])->middleware(['auth', 've
 
 Route::get('/sintas', [SintasController::class, 'index'])->middleware(['auth', 'verified'])->name('sintas');
 
+Route::get('/overview', [SintasController::class, 'overview'])->middleware(['auth', 'verified'])->name('overview');
+
 // Department Routes
 Route::prefix('departments')->middleware(['auth', 'verified'])->name('departments.')->group(function () {
     Route::get('/operations', [SintasController::class, 'operations'])->name('operations');
+    Route::get('/operations/overview', [SintasController::class, 'overviewOperations'])->name('overview.operations');
     Route::get('/sales-marketing', [SintasController::class, 'salesMarketing'])->name('sales-marketing');
+    Route::get('/sales-marketing/overview', [SintasController::class, 'overviewSalesMarketing'])->name('overview.sales-marketing');
     Route::get('/finance', [SintasController::class, 'finance'])->name('finance');
+    Route::get('/finance/overview', [SintasController::class, 'overviewFinance'])->name('overview.finance');
     Route::get('/product-rnd', [SintasController::class, 'productRnd'])->name('product-rnd');
+    Route::get('/product-rnd/overview', [SintasController::class, 'overviewProductRnd'])->name('overview.product-rnd');
     Route::get('/it', [SintasController::class, 'it'])->name('it');
+    Route::get('/it/overview', [SintasController::class, 'overviewIt'])->name('overview.it');
     Route::get('/academic', [SintasController::class, 'academic'])->name('academic');
+    Route::get('/academic/overview', [SintasController::class, 'overviewAcademic'])->name('overview.academic');
+    Route::get('/engagement-retention', [SintasController::class, 'engagementRetention'])->name('engagement-retention');
+    Route::get('/engagement-retention/overview', [SintasController::class, 'overviewEngagementRetention'])->name('overview.engagement-retention');
 });
 
 // Registration Routes (Pendaftaran Layanan & Program)

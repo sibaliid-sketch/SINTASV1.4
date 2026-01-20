@@ -16,7 +16,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Selamat Datang di SITRA</h3>
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Halo! {{ auth()->user()->name }}, Selamat Datang di SITRA</h3>
                             <p class="text-gray-600">Platform untuk orang tua memantau perkembangan belajar anak.</p>
                         </div>
                     </div>

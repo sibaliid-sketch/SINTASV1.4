@@ -16,7 +16,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Selamat Datang di SIMY</h3>
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Halo! {{ auth()->user()->name }}, Selamat Datang di SIMY</h3>
                             <p class="text-gray-600">Sistem pembelajaran online untuk siswa dengan fitur lengkap dan interaktif.</p>
                         </div>
                     </div>

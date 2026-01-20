@@ -1,18 +1,31 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center">
-            <a href="{{ route('sintas') }}" class="mr-4 text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </a>
-            <h2 class="font-semibold text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">
-                {{ __('Academic Department') }}
-            </h2>
-        </div>
-    </x-slot>
+            <x-slot name="header">
+                <div class="flex items-center">
+                    <a href="{{ route('sintas') }}" class="mr-4 text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <h2 class="font-semibold text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">
+                        {{ __('SINTAS - Sistem Internal (Academic)') }}
+                    </h2>
+                </div>
+            </x-slot>
 
-    <div class="py-12 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen">
+    <!-- Tab Navigation -->
+    <div class="bg-white/60 backdrop-blur-sm border-b border-gray-200/50 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <a href="{{ route('departments.academic') }}" class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" aria-current="page">
+                    Dashboard
+                </a>
+                <a href="{{ route('departments.overview.academic') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Overview
+                </a>
+            </nav>
+        </div>
+    </div>
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white/60 backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl border border-gray-200/50 mb-8">
                 <div class="p-8">
@@ -23,7 +36,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Academic Department</h3>
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Selamat Datang di SINTAS (Academic)</h3>
                             <p class="text-gray-600">Kelola kurikulum, materi pembelajaran, dan standar akademik.</p>
                         </div>
                     </div>

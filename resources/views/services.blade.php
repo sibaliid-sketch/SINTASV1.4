@@ -139,6 +139,17 @@
         </div>
     </main>
 
+    <!-- Floating Admin Chat Toggle -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <button id="admin-chat-toggle" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-full p-4 shadow-2xl transition-all duration-300 animate-pulse hover:animate-none hover:scale-110" title="Chat Admin AI">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                <circle cx="9" cy="7" r="1"></circle>
+                <circle cx="15" cy="7" r="1"></circle>
+            </svg>
+        </button>
+    </div>
+
 </body>
 </html>
     <!-- Artistic Footer -->

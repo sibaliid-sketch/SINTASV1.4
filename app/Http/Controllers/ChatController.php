@@ -12,6 +12,7 @@ class ChatController extends Controller
     {
         $request->validate([
             'message' => 'required|string|max:1000',
+            'source' => 'nullable|string',
         ]);
 
         // Save user message
@@ -21,6 +22,7 @@ class ChatController extends Controller
             'message' => $request->message,
             'sender_type' => 'user',
             'session_id' => session()->getId(),
+            'source' => $request->source,
         ]);
 
         // Simulate AI response (in future, this could be handled by admin or AI)
@@ -31,6 +33,7 @@ class ChatController extends Controller
             'message' => 'Terima kasih atas pesan Anda. Admin akan segera merespons.',
             'sender_type' => 'ai',
             'session_id' => session()->getId(),
+            'source' => $request->source,
         ]);
 
         return response()->json([

@@ -17,6 +17,7 @@ class ChatMessage extends Model
         'sender_type',
         'is_read',
         'session_id',
+        'source',
     ];
 
     protected $casts = [

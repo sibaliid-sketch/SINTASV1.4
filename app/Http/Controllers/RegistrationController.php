@@ -19,7 +19,7 @@ class RegistrationController extends Controller
         return view('registration.step1-intro');
     }
 
-    // ==================== STEP 1 ==================== (Section 1: Who to register)
+    // ==================== STEP 1 ==================== (Who to register)
     public function step1Show()
     {
         return view('registration.step1-registrar');
@@ -28,45 +28,34 @@ class RegistrationController extends Controller
     public function step1Submit(Request $request)
     {
         $validated = $request->validate([
-            'is_parent_register' => 'required|in:yes,no',
+            'is_self_register' => 'required|boolean',
         ]);
 
         return redirect()->route('registration.step2')->with($validated)->withInput();
     }
 
-    // ==================== STEP 2 ==================== (Section 2: Education)
+    // ==================== STEP 2 ==================== (Education & Student Data Form)
     public function step2Show(Request $request)
     {
-        if (!session('is_parent_register')) {
+        if (!session()->has('is_self_register')) {
             return redirect()->route('registration.step1');
         }
 
-        return view('registration.step2-education');
+        $programs = Program::where('is_active', true)->get();
+
+        return view('registration.step2-form', compact('programs'));
     }
 
     public function step2Submit(Request $request)
     {
         $validated = $request->validate([
-            'is_parent_register' => 'required|in:yes,no',
+            'is_self_register' => 'required|boolean',
             'education_level' => 'required|string|in:TK,SD,SMP,SMA,Mahasiswa,Umum',
             'class_level' => 'nullable|string|max:50',
-        ]);
-
-        return redirect()->route('registration.step3')->with($validated)->withInput();
-    }
-
-    // ==================== STEP 3 ==================== (Section 3: Student Data)
-    public function step3Show(Request $request)
-    {
-        return view('registration.step4-student-data');
-    }
-
-    public function step3Submit(Request $request)
-    {
-        $validated = $request->validate([
+            'service_type' => 'required|string|in:Regular-in Class,Private,Rumah Belajar,Mitra Belajar',
             'student_name' => 'required|string|max:255',
-            'student_birthdate' => 'required|date|before:today',
             'student_identity_number' => 'required|string|max:50',
+            'student_dob' => 'required|date|before:today',
             'student_gender' => 'required|in:male,female',
             'student_province' => 'required|string|max:100',
             'student_regency' => 'required|string|max:100',
@@ -75,7 +64,7 @@ class RegistrationController extends Controller
             'student_address_detail' => 'required|string',
             'student_phone' => 'nullable|string|max:20',
             'student_email' => 'nullable|email',
-            'is_parent_register' => 'required|in:yes,no',
+            'student_job' => 'nullable|string|max:100',
             'parent_name' => 'nullable|string|max:255',
             'parent_identity_number' => 'nullable|string|max:50',
             'parent_relationship' => 'nullable|string|max:50',
@@ -86,12 +75,15 @@ class RegistrationController extends Controller
             'parent_district' => 'nullable|string|max:100',
             'parent_village' => 'nullable|string|max:100',
             'parent_address_detail' => 'nullable|string',
-            'student_job' => 'nullable|string|max:100',
+            'program_id' => 'required|exists:programs,id',
+            'promo_code' => 'nullable|string|max:50',
+            'agree_terms' => 'required|accepted',
+            'agree_contract' => 'required|accepted',
         ]);
 
         // Age validation for self-registration
-        if ($request->input('is_parent_register') === 'no') {
-            $birthdate = new \DateTime($request->input('student_birthdate'));
+        if ($request->input('is_self_register')) {
+            $birthdate = new \DateTime($request->input('student_dob'));
             $today = new \DateTime();
             $age = $today->diff($birthdate)->y;
 
@@ -111,221 +103,27 @@ class RegistrationController extends Controller
             }
         }
 
-        return redirect()->route('registration.step4')->with($validated)->withInput();
+        return redirect()->route('registration.step3')->with($validated)->withInput();
     }
 
-    // ==================== STEP 4 ==================== (Section 4: Program & Service)
-    public function step4Show(Request $request)
+    // ==================== STEP 3 ==================== (Review & Confirm)
+    public function step3Show(Request $request)
     {
-        $educationLevel = $request->get('education_level') ?? old('education_level');
-        $classLevel = $request->get('class_level') ?? old('class_level');
-
-        if (!$educationLevel) {
-            return redirect()->route('registration.step3');
+        if (!session()->has('program_id')) {
+            return redirect()->route('registration.step2');
         }
 
-        // Determine service type based on education level
-        $serviceType = '';
-        if (in_array($educationLevel, ['TK', 'SD'])) {
-            $serviceType = 'SIMY';
-        } elseif (in_array($educationLevel, ['SMP', 'SMA'])) {
-            $serviceType = 'SITRA';
-        } elseif (in_array($educationLevel, ['Mahasiswa', 'Umum'])) {
-            $serviceType = 'SINTAS';
-        }
-
-        $query = Program::where('education_level', $educationLevel)
-            ->where('service_type', $serviceType)
-            ->where('is_active', true);
-
-        // Filter by class if applicable (for now, assume programs don't have class, but can add later)
-        // if ($classLevel && in_array($educationLevel, ['TK', 'SD', 'SMP', 'SMA'])) {
-        //     $query->where('class_level', $classLevel);
-        // }
-
-        $programs = $query->get();
-
-        return view('registration.step5-program-service', compact('programs', 'educationLevel', 'serviceType', 'classLevel'));
-    }
-
-    public function step4Submit(Request $request)
-    {
-        $validated = $request->validate([
-            'program_id' => 'required|exists:programs,id',
-        ]);
-
-        return redirect()->route('registration.step5')->with($validated)->withInput();
-    }
-
-    // ==================== STEP 5 ==================== (Section 5: Review & Promo)
-    public function step5Show(Request $request)
-    {
-        $programId = $request->get('program_id') ?? old('program_id');
-        $studentBirthdate = $request->get('student_birthdate') ?? old('student_birthdate');
-
-        if (!$programId || !$studentBirthdate) {
-            return redirect()->route('registration.step4');
-        }
-
-        $program = Program::findOrFail($programId);
+        $program = Program::findOrFail(session('program_id'));
+        $schedule = Schedule::where('program_id', $program->id)->where('is_active', true)->first();
 
         // Calculate age
-        $birthdate = new \DateTime($studentBirthdate);
+        $birthdate = new \DateTime(session('student_dob'));
         $today = new \DateTime();
         $studentAge = $today->diff($birthdate)->y;
 
-        return view('registration.step6-review-promo', compact('program', 'studentAge'));
-    }
-
-    public function step5Submit(Request $request)
-    {
-        $validated = $request->validate([
-            'agree_terms' => 'required|accepted',
-            'agree_contract' => 'required|accepted',
-            'promo_code' => 'nullable|string|max:50',
-            'payment_choice' => 'required|in:pay_now,pay_later',
-        ]);
-
-        $paymentChoice = $request->input('payment_choice');
-
-        if ($paymentChoice === 'pay_later') {
-            // Create registration with pending_payment status, skip payment step
-            return $this->createRegistration($request, 'pending_payment');
-        } else {
-            // Proceed to payment step
-            return redirect()->route('registration.step7')->withInput();
-        }
-    }
-
-    // ==================== STEP 6 ==================== (Section 6: Summary)
-    public function step6Show(Request $request)
-    {
-        $programId = $request->get('program_id') ?? old('program_id');
-        $studentBirthdate = $request->get('student_birthdate') ?? old('student_birthdate');
-
-        if (!$programId || !$studentBirthdate) {
-            return redirect()->route('registration.step5');
-        }
-
-        $program = Program::findOrFail($programId);
-
-        // Calculate age
-        $birthdate = new \DateTime($studentBirthdate);
-        $today = new \DateTime();
-        $studentAge = $today->diff($birthdate)->y;
-
-        return view('registration.step7-summary', compact('program', 'studentAge'));
-    }
-
-    public function step6Submit(Request $request)
-    {
-        // Just proceed to payment
-        return redirect()->route('registration.step7')->withInput();
-    }
-
-    // ==================== STEP 7 ==================== (Section 7: Payment)
-    public function step7Show(Request $request)
-    {
-        $programId = $request->get('program_id') ?? old('program_id');
-
-        if (!$programId) {
-            return redirect()->route('registration.step6');
-        }
-
-        $program = Program::findOrFail($programId);
-
-        return view('registration.step8-payment', compact('program'));
-    }
-
-    public function step7Submit(Request $request)
-    {
-        $validated = $request->validate([
-            'payment_choice' => 'required|in:pay_now,pay_later',
-        ]);
-
-        $paymentChoice = $request->input('payment_choice');
-
-        if ($paymentChoice === 'pay_later') {
-            // Create registration with pending_payment status, skip payment step
-            return $this->createRegistration($request, 'pending_payment');
-        } else {
-            // Create registration and proceed to payment upload
-            $registration = $this->createRegistration($request, 'awaiting_verification', true);
-            return redirect()->route('registration.step8', $registration->id);
-        }
-    }
-
-    private function createRegistration(Request $request, $status = 'pending_payment', $returnObject = false)
-    {
-        // Validate promo code if provided
-        $promoCode = $request->input('promo_code');
-
-        // Get all data from request (which includes session via request helper)
-        $programId = $request->get('program_id') ?? old('program_id');
-
-        if (!$programId) {
-            return redirect()->route('registration.step6');
-        }
-
-        $program = Program::findOrFail($programId);
-
-        // Auto-assign first available schedule
-        $schedule = Schedule::where('program_id', $program->id)
-            ->where('is_active', true)
-            ->first();
-
-        if (!$schedule) {
-            return redirect()->route('registration.step4')->with(['error' => 'Tidak ada jadwal tersedia untuk program ini']);
-        }
-
-        $scheduleId = $schedule->id;
-
-        // Get all student data using request()->all() which includes session
-        $studentName = $request->get('student_name') ?? old('student_name');
-        $studentBirthdate = $request->get('student_birthdate') ?? old('student_birthdate');
-        $studentIdentityNumber = $request->get('student_identity_number') ?? old('student_identity_number');
-        $studentGender = $request->get('student_gender') ?? old('student_gender');
-        $studentProvince = $request->get('student_province') ?? old('student_province');
-        $studentRegency = $request->get('student_regency') ?? old('student_regency');
-        $studentDistrict = $request->get('student_district') ?? old('student_district');
-        $studentVillage = $request->get('student_village') ?? old('student_village');
-        $studentAddressDetail = $request->get('student_address_detail') ?? old('student_address_detail');
-        $studentAddress = $studentProvince . ', ' . $studentRegency . ', ' . $studentDistrict . ', ' . $studentVillage . ', ' . $studentAddressDetail;
-        $studentPhone = $request->get('student_phone') ?? old('student_phone');
-        $studentEmail = $request->get('student_email') ?? old('student_email');
-        $isParentRegister = $request->get('is_parent_register') ?? old('is_parent_register');
-        $studentJob = $request->get('student_job') ?? old('student_job');
-
-        // Parent data
-        $parentName = $request->get('parent_name') ?? old('parent_name');
-        $parentIdentityNumber = $request->get('parent_identity_number') ?? old('parent_identity_number');
-        $parentRelationship = $request->get('parent_relationship') ?? old('parent_relationship');
-        $parentPhone = $request->get('parent_phone') ?? old('parent_phone');
-        $parentEmail = $request->get('parent_email') ?? old('parent_email');
-        $parentProvince = $request->get('parent_province') ?? old('parent_province');
-        $parentRegency = $request->get('parent_regency') ?? old('parent_regency');
-        $parentDistrict = $request->get('parent_district') ?? old('parent_district');
-        $parentVillage = $request->get('parent_village') ?? old('parent_village');
-        $parentAddressDetail = $request->get('parent_address_detail') ?? old('parent_address_detail');
-        $parentAddress = $parentProvince ? $parentProvince . ', ' . $parentRegency . ', ' . $parentDistrict . ', ' . $parentVillage . ', ' . $parentAddressDetail : null;
-
-        // Verify all required data is present
-        if (!$studentName || !$studentBirthdate || !$studentIdentityNumber) {
-            return redirect()->route('registration.step3')->with(['error' => 'Data tidak lengkap']);
-        }
-
-        // Generate IDs
-        $orderId = IdGeneratorService::generateOrderId();
-        $studentId = IdGeneratorService::generateStudentId();
-        $invoiceId = IdGeneratorService::generateInvoiceId();
-
-        // Calculate age
-        $birthdate = new \DateTime($studentBirthdate);
-        $today = new \DateTime();
-        $studentAge = $today->diff($birthdate)->y;
-
-        // Calculate discount if promo exists
+        // Calculate discount
         $discountAmount = 0;
+        $promoCode = session('promo_code');
         if ($promoCode) {
             $promo = Promo::where('promo_code', strtoupper($promoCode))
                 ->where('is_active', true)
@@ -336,70 +134,36 @@ class RegistrationController extends Controller
             }
         }
 
-        // Create registration
-        $registration = Registration::create([
-            'order_id' => $orderId,
-            'student_id' => $studentId,
-            'invoice_id' => $invoiceId,
-            'program_id' => $programId,
-            'schedule_id' => $scheduleId,
-            'student_name' => $studentName,
-            'student_birthdate' => $studentBirthdate,
-            'student_identity_number' => $studentIdentityNumber,
-            'student_gender' => $studentGender,
-            'student_address' => $studentAddress,
-            'student_phone' => $studentPhone,
-            'student_email' => $studentEmail,
-            'student_job' => $studentJob,
-            'parent_name' => $parentName,
-            'parent_identity_number' => $parentIdentityNumber,
-            'parent_phone' => $parentPhone,
-            'parent_email' => $parentEmail,
-            'parent_relationship' => $parentRelationship,
-            'parent_address' => $parentAddress,
-            'is_parent_register' => $isParentRegister === 'yes',
-            'student_age' => $studentAge,
-            'status' => $status,
-            'base_price' => $program->price,
-            'discount_amount' => $discountAmount,
-            'tax_amount' => 0,
-            'total_amount' => $program->price - $discountAmount,
-            'payment_status' => $status === 'pending_payment' ? 'unpaid' : 'pending',
-        ]);
+        $totalPrice = $program->price - $discountAmount;
 
-        // Log audit
-        AuditLoggerService::log('created', 'Registration', $registration->id, [], "Order {$orderId} created");
-
-        // Notify admins
-        $notificationType = $status === 'pending_payment' ? 'registration_pay_later' : 'registration_pay_now';
-        $title = $status === 'pending_payment' ? 'Pendaftaran Baru - Bayar Nanti' : 'Pendaftaran Baru - Menunggu Pembayaran';
-        $message = "Pendaftaran baru dari {$studentName} untuk program {$program->name}. Order ID: {$orderId}";
-        \App\Services\NotificationService::notifyAdmins($notificationType, $title, $message, [
-            'registration_id' => $registration->id,
-            'order_id' => $orderId,
-            'student_name' => $studentName,
-            'program_name' => $program->name,
-            'service_type' => $program->service_type,
-        ]);
-
-        if ($returnObject) {
-            return $registration;
-        }
-
-        if ($status === 'pending_payment') {
-            return redirect()->route('registration.step8', $registration->id);
-        } else {
-            return redirect()->route('registration.step8', $registration->id);
-        }
+        return view('registration.step3-review', compact('program', 'schedule', 'studentAge', 'discountAmount', 'totalPrice'));
     }
 
-    // ==================== STEP 8 ==================== (Confirmation)
-    public function step8Show(Registration $registration)
+    public function step3Submit(Request $request)
     {
-        return view('registration.step9-confirmation', compact('registration'));
+        $validated = $request->validate([
+            'payment_choice' => 'required|in:pay_now,pay_later',
+        ]);
+
+        $paymentChoice = $request->input('payment_choice');
+
+        if ($paymentChoice === 'pay_later') {
+            // Create registration with pending_payment status
+            return $this->createRegistration($request, 'pending_payment');
+        } else {
+            // Create registration and proceed to payment
+            $registration = $this->createRegistration($request, 'awaiting_verification', true);
+            return redirect()->route('registration.step4', $registration->id);
+        }
     }
 
-    public function step8Submit(Request $request, Registration $registration)
+    // ==================== STEP 4 ==================== (Payment)
+    public function step4Show(Registration $registration)
+    {
+        return view('registration.step4-payment', compact('registration'));
+    }
+
+    public function step4Submit(Request $request, Registration $registration)
     {
         $validated = $request->validate([
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -434,12 +198,110 @@ class RegistrationController extends Controller
         // Log audit
         AuditLoggerService::log('payment_proof_uploaded', 'Registration', $registration->id, [], 'Bukti pembayaran diupload');
 
-        return redirect()->route('registration.step9', $registration->id);
+        return redirect()->route('registration.step5', $registration->id);
     }
 
-    // ==================== STEP 9 ==================== (Final Confirmation)
-    public function step9Show(Registration $registration)
+    // ==================== STEP 5 ==================== (Final Confirmation)
+    public function step5Show(Registration $registration)
     {
-        return view('registration.step10-confirmation', compact('registration'));
+        return view('registration.step5-confirmation', compact('registration'));
+    }
+
+    private function createRegistration(Request $request, $status = 'pending_payment', $returnObject = false)
+    {
+        $program = Program::findOrFail(session('program_id'));
+
+        // Auto-assign first available schedule
+        $schedule = Schedule::where('program_id', $program->id)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$schedule) {
+            return redirect()->route('registration.step2')->with(['error' => 'Tidak ada jadwal tersedia untuk program ini']);
+        }
+
+        // Build addresses
+        $studentAddress = session('student_province') . ', ' . session('student_regency') . ', ' . session('student_district') . ', ' . session('student_village') . ', ' . session('student_address_detail');
+        $parentAddress = session('parent_province') ? session('parent_province') . ', ' . session('parent_regency') . ', ' . session('parent_district') . ', ' . session('parent_village') . ', ' . session('parent_address_detail') : null;
+
+        // Generate IDs
+        $orderId = IdGeneratorService::generateOrderId();
+        $studentId = IdGeneratorService::generateStudentId();
+        $invoiceId = IdGeneratorService::generateInvoiceId();
+
+        // Calculate age
+        $birthdate = new \DateTime(session('student_dob'));
+        $today = new \DateTime();
+        $studentAge = $today->diff($birthdate)->y;
+
+        // Calculate discount
+        $discountAmount = 0;
+        $promoCode = session('promo_code');
+        if ($promoCode) {
+            $promo = Promo::where('promo_code', strtoupper($promoCode))
+                ->where('is_active', true)
+                ->first();
+
+            if ($promo && $promo->isValid()) {
+                $discountAmount = $promo->calculateDiscount($program->price);
+            }
+        }
+
+        // Create registration
+        $registration = Registration::create([
+            'order_id' => $orderId,
+            'student_id' => $studentId,
+            'invoice_id' => $invoiceId,
+            'program_id' => $program->id,
+            'schedule_id' => $schedule->id,
+            'promo_id' => $promo ? $promo->id : null,
+            'student_name' => session('student_name'),
+            'student_identity_number' => session('student_identity_number'),
+            'student_dob' => session('student_dob'),
+            'student_gender' => session('student_gender'),
+            'student_address' => $studentAddress,
+            'student_phone' => session('student_phone'),
+            'student_email' => session('student_email'),
+            'student_job' => session('student_job'),
+            'student_age' => $studentAge,
+            'education_level' => session('education_level'),
+            'class_level' => session('class_level'),
+            'service_type' => session('service_type'),
+            'is_self_register' => session('is_self_register'),
+            'parent_name' => session('parent_name'),
+            'parent_identity_number' => session('parent_identity_number'),
+            'parent_phone' => session('parent_phone'),
+            'parent_email' => session('parent_email'),
+            'parent_relationship' => session('parent_relationship'),
+            'parent_address' => $parentAddress,
+            'status' => $status,
+            'base_price' => $program->price,
+            'discount_amount' => $discountAmount,
+            'tax_amount' => 0,
+            'total_price' => $program->price - $discountAmount,
+            'payment_status' => $status === 'pending_payment' ? 'unpaid' : 'pending',
+            'payment_deadline' => now()->addDays(2), // 2 days before class starts
+        ]);
+
+        // Log audit
+        AuditLoggerService::log('created', 'Registration', $registration->id, [], "Order {$orderId} created");
+
+        // Notify admins
+        $notificationType = $status === 'pending_payment' ? 'registration_pay_later' : 'registration_pay_now';
+        $title = $status === 'pending_payment' ? 'Pendaftaran Baru - Bayar Nanti' : 'Pendaftaran Baru - Menunggu Pembayaran';
+        $message = "Pendaftaran baru dari " . session('student_name') . " untuk program {$program->name}. Order ID: {$orderId}";
+        \App\Services\NotificationService::notifyAdmins($notificationType, $title, $message, [
+            'registration_id' => $registration->id,
+            'order_id' => $orderId,
+            'student_name' => session('student_name'),
+            'program_name' => $program->name,
+            'service_type' => $program->service_type,
+        ]);
+
+        if ($returnObject) {
+            return $registration;
+        }
+
+        return redirect()->route('registration.step4', $registration->id);
     }
 }

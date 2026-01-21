@@ -11,7 +11,7 @@ class SintasController extends Controller
      */
     public function welcome()
     {
-        return view('sintas.welcome');
+        return view('welcome.welcomesintas.welcome-sintas');
     }
 
     /**
@@ -36,6 +36,8 @@ class SintasController extends Controller
                     return redirect()->route('departments.it');
                 case 'academic':
                     return redirect()->route('departments.academic');
+                case 'pr':
+                    return redirect()->route('departments.pr');
                 case 'engagement':
                 case 'retention':
                     return redirect()->route('departments.engagement-retention');
@@ -44,7 +46,7 @@ class SintasController extends Controller
 
         // Fallback to main dashboard with metrics
         $metrics = $this->getMetricsForUser($user);
-        return view('sintas', compact('metrics'));
+        return view('SINTAS/Superadmin/dashboard', compact('metrics'));
     }
 
     /**
@@ -115,6 +117,18 @@ class SintasController extends Controller
                         'efficiency_gain' => '15%',
                     ];
                     break;
+                case 'pr':
+                    $baseMetrics['tasks_completed'] = 85;
+                    $baseMetrics['tasks_pending'] = 10;
+                    $baseMetrics['tasks_overdue'] = 2;
+                    $baseMetrics['performance_score'] = 89;
+                    $baseMetrics['team_members'] = 6;
+                    $baseMetrics['department_specific'] = [
+                        'media_coverage' => 45,
+                        'press_releases' => 12,
+                        'brand_mentions' => '150%',
+                    ];
+                    break;
                 case 'sales-marketing':
                     $baseMetrics['department_specific'] = [
                         'leads_generated' => 150,
@@ -159,11 +173,18 @@ class SintasController extends Controller
         $user = auth()->user();
 
         // Allow superadmin (all access) or admin_operational (only operational dashboard)
-        if ($user->role !== 'superadmin' && $user->role !== 'admin_operational') {
+        // Also allow karyawan in operations department with Manager or Executive position
+        $hasAccess = $user->role === 'superadmin' ||
+                    $user->role === 'admin_operational' ||
+                    ($user->role === 'karyawan' &&
+                     $user->department === 'operations' &&
+                     in_array($user->position, ['Manager', 'Executive']));
+
+        if (!$hasAccess) {
             abort(403, 'Unauthorized access');
         }
 
-        return view('sintas.operations');
+        return view('SINTAS/operations/dashboard-operations');
     }
 
     /**
@@ -171,7 +192,7 @@ class SintasController extends Controller
      */
     public function salesMarketing()
     {
-        return view('sintas.sales-marketing');
+        return view('SINTAS/sales-marketing/dashboard-sales_marketin');
     }
 
     /**
@@ -179,7 +200,7 @@ class SintasController extends Controller
      */
     public function finance()
     {
-        return view('sintas.finance');
+        return view('SINTAS/finance/dashboard-finance');
     }
 
     /**
@@ -187,7 +208,7 @@ class SintasController extends Controller
      */
     public function productRnd()
     {
-        return view('sintas.product-rnd');
+        return view('SINTAS/product-rnd/dashboard-product_rnd');
     }
 
     /**
@@ -195,7 +216,78 @@ class SintasController extends Controller
      */
     public function it()
     {
-        return view('sintas.it');
+        return view('SINTAS/it/dashboard-it');
+    }
+
+    /**
+     * Display the IT Chat Console page.
+     */
+    public function itChatConsole()
+    {
+        // Get active chats for IT department (only user messages, not admin)
+        $activeChats = \App\Models\ChatMessage::where('department', 'it')
+            ->where('sender_type', 'user')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->with('sender')
+            ->get()
+            ->groupBy('sender_id')
+            ->map(function ($messages, $senderId) {
+                $lastMessage = $messages->last();
+                return [
+                    'user' => $lastMessage->sender,
+                    'last_message' => $lastMessage,
+                    'unread_count' => $messages->where('is_read', false)->count()
+                ];
+            })
+            ->values();
+
+        return view('SINTAS.it.it-chat-console', compact('activeChats'));
+    }
+
+    /**
+     * Get chat messages for a specific user in a department.
+     */
+    public function getChatMessages($department, $userId)
+    {
+        $user = auth()->user();
+
+        // Check access
+        if ($user->role !== 'superadmin' && $user->department !== $department) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Get messages between the user and any admin in this department
+        $messages = \App\Models\ChatMessage::where('department', $department)
+            ->where(function ($query) use ($userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('sender_id', $userId)->where('sender_type', 'user');
+                })->orWhere(function ($q) use ($userId) {
+                    $q->where('receiver_id', $userId)->where('sender_type', 'admin');
+                });
+            })
+            ->with(['sender', 'receiver'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $chatUser = \App\Models\User::find($userId);
+
+        return response()->json([
+            'messages' => $messages->map(function ($msg) {
+                return [
+                    'id' => $msg->id,
+                    'message' => $msg->message,
+                    'sender_type' => $msg->sender_type,
+                    'sender_name' => $msg->sender ? $msg->sender->name : 'Admin',
+                    'created_at' => $msg->created_at->format('H:i'),
+                    'is_mine' => $msg->sender_id == auth()->id(),
+                ];
+            }),
+            'user' => $chatUser ? [
+                'id' => $chatUser->id,
+                'name' => $chatUser->name,
+                'department' => $chatUser->department,
+            ] : null,
+        ]);
     }
 
     /**
@@ -203,7 +295,36 @@ class SintasController extends Controller
      */
     public function academic()
     {
-        return view('sintas.academic');
+        return view('SINTAS/academic/dashboard-academic');
+    }
+
+    /**
+     * Display the Academic Services page.
+     */
+    public function academicServices()
+    {
+        $services = \App\Models\Service::paginate(15);
+        return view('SINTAS.academic.academic-services.index', compact('services'));
+    }
+
+    /**
+     * Display the Academic Programs page.
+     */
+    public function academicPrograms()
+    {
+        $programs = \App\Models\Program::with('service')->paginate(15);
+        $services = \App\Models\Service::all();
+        return view('SINTAS.academic.academic-programs.index', compact('programs', 'services'));
+    }
+
+    /**
+     * Display the Academic Schedules page.
+     */
+    public function academicSchedules()
+    {
+        $schedules = \App\Models\Schedule::with('program.service')->paginate(15);
+        $programs = \App\Models\Program::with('service')->get();
+        return view('SINTAS.academic.academic-schedules.index', compact('schedules', 'programs'));
     }
 
     /**
@@ -211,7 +332,26 @@ class SintasController extends Controller
      */
     public function engagementRetention()
     {
-        return view('sintas.engagement-retention');
+        return view('SINTAS/engagement-retention/dashboard-engagement_retention');
+    }
+
+    /**
+     * Display the PR department page.
+     */
+    public function pr()
+    {
+        $attendances = \App\Models\Attendance::latest('date_time')->take(50)->get();
+        return view('SINTAS/pr/dashboar-pr', compact('attendances'));
+    }
+
+    /**
+     * Display the PR Overview page with pagination.
+     */
+    public function overviewPr()
+    {
+        $metrics = $this->getMetricsForDepartment('pr');
+        $attendances = \App\Models\Attendance::latest('date_time')->paginate(50);
+        return view('SINTAS/pr/overview-pr', compact('metrics', 'attendances'));
     }
 
     /**
@@ -222,7 +362,7 @@ class SintasController extends Controller
         $user = auth()->user();
         $metrics = $this->getMetricsForUser($user);
 
-        return view('overview', compact('metrics'));
+        return view('SINTAS/Superadmin/overview', compact('metrics'));
     }
 
     /**
@@ -231,7 +371,7 @@ class SintasController extends Controller
     public function overviewOperations()
     {
         $metrics = $this->getMetricsForDepartment('operations');
-        return view('overview-operations', compact('metrics'));
+        return view('SINTAS/operations/overview-operations', compact('metrics'));
     }
 
     /**
@@ -240,7 +380,7 @@ class SintasController extends Controller
     public function overviewSalesMarketing()
     {
         $metrics = $this->getMetricsForDepartment('sales-marketing');
-        return view('overview-sales-marketing', compact('metrics'));
+        return view('SINTAS/sales-marketing/overview-sales_marketing', compact('metrics'));
     }
 
     /**
@@ -249,7 +389,7 @@ class SintasController extends Controller
     public function overviewFinance()
     {
         $metrics = $this->getMetricsForDepartment('finance');
-        return view('overview-finance', compact('metrics'));
+        return view('SINTAS/finance/overview-finance', compact('metrics'));
     }
 
     /**
@@ -258,7 +398,7 @@ class SintasController extends Controller
     public function overviewProductRnd()
     {
         $metrics = $this->getMetricsForDepartment('product-rnd');
-        return view('overview-product-rnd', compact('metrics'));
+        return view('SINTAS/product-rnd/overview-product_nd', compact('metrics'));
     }
 
     /**
@@ -267,7 +407,7 @@ class SintasController extends Controller
     public function overviewIt()
     {
         $metrics = $this->getMetricsForDepartment('it');
-        return view('overview-it', compact('metrics'));
+        return view('SINTAS/it/overview-it', compact('metrics'));
     }
 
     /**
@@ -276,7 +416,7 @@ class SintasController extends Controller
     public function overviewAcademic()
     {
         $metrics = $this->getMetricsForDepartment('academic');
-        return view('overview-academic', compact('metrics'));
+        return view('SINTAS/academic/overview-academic', compact('metrics'));
     }
 
     /**
@@ -285,7 +425,91 @@ class SintasController extends Controller
     public function overviewEngagementRetention()
     {
         $metrics = $this->getMetricsForDepartment('engagement-retention');
-        return view('overview-engagement-retention', compact('metrics'));
+        return view('SINTAS/engagement-retention/overview-engagement_retention', compact('metrics'));
+    }
+
+    /**
+     * Display the enhanced attendance page with filters.
+     */
+    public function attendanceIndex(Request $request)
+    {
+        $query = \App\Models\Attendance::query();
+
+        // Apply filters
+        if ($request->filled('start_date')) {
+            $query->whereDate('date_time', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('date_time', '<=', $request->end_date);
+        }
+
+        if ($request->filled('pin')) {
+            $query->where('pin', 'like', '%' . $request->pin . '%');
+        }
+
+        if ($request->filled('device_id')) {
+            $query->where('device_id', $request->device_id);
+        }
+
+        // Get unique device IDs for filter dropdown
+        $devices = \App\Models\Attendance::select('device_id')
+            ->distinct()
+            ->orderBy('device_id')
+            ->pluck('device_id');
+
+        // Paginate results with query string preservation
+        $attendances = $query->latest('date_time')->paginate(50)->appends($request->query());
+
+        return view('SINTAS/Superadmin/superadmin-attendance/main', compact('attendances', 'devices'));
+    }
+
+    /**
+     * Display the General page for a department with tabs.
+     */
+    public function general()
+    {
+        $routeName = request()->route()->getName();
+        $parts = explode('.', $routeName);
+        $department = $parts[1]; // e.g., 'operations' from 'departments.operations.general'
+
+        $user = auth()->user();
+
+        // Check access based on department
+        $hasAccess = $user->role === 'superadmin' ||
+                    ($user->role === 'karyawan' && $user->department === $department) ||
+                    ($user->role === 'admin_operational' && $department === 'operations');
+
+        if (!$hasAccess) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $metrics = $this->getMetricsForDepartment($department);
+        return view('SINTAS.' . $department . '.general', compact('department', 'metrics'));
+    }
+
+    /**
+     * Display the Tools page for a department with tabs.
+     */
+    public function tools()
+    {
+        $routeName = request()->route()->getName();
+        $parts = explode('.', $routeName);
+        $department = $parts[1]; // e.g., 'operations' from 'departments.operations.tools'
+
+        $user = auth()->user();
+
+        // Check access based on department
+        $hasAccess = $user->role === 'superadmin' ||
+                    ($user->role === 'karyawan' && $user->department === $department) ||
+                    ($user->role === 'admin_operational' && $department === 'operations');
+
+        if (!$hasAccess) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $metrics = $this->getMetricsForDepartment($department);
+        return view('SINTAS.' . $department . '.tools', compact('department', 'metrics'));
     }
 
     /**
@@ -314,6 +538,18 @@ class SintasController extends Controller
                 $baseMetrics['department_specific'] = [
                     'processes_optimized' => 25,
                     'efficiency_gain' => '18%',
+                ];
+                break;
+            case 'pr':
+                $baseMetrics['tasks_completed'] = 85;
+                $baseMetrics['tasks_pending'] = 10;
+                $baseMetrics['tasks_overdue'] = 2;
+                $baseMetrics['performance_score'] = 89;
+                $baseMetrics['team_members'] = 6;
+                $baseMetrics['department_specific'] = [
+                    'media_coverage' => 45,
+                    'press_releases' => 12,
+                    'brand_mentions' => '150%',
                 ];
                 break;
             case 'sales-marketing':

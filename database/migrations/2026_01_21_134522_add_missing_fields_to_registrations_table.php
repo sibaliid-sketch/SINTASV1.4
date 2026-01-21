@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('registrations', function (Blueprint $table) {
+            $table->string('student_identity_number')->nullable()->after('student_name');
+            $table->string('student_job')->nullable()->after('student_email');
+            $table->integer('student_age')->nullable()->after('student_job');
+            $table->string('parent_identity_number')->nullable()->after('parent_name');
+            $table->enum('service_type', ['Regular-in Class', 'Private', 'Rumah Belajar', 'Mitra Belajar'])->nullable()->after('class_level');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('registrations', function (Blueprint $table) {
+            //
+        });
+    }
+};

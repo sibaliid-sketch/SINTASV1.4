@@ -26,5 +26,7 @@
                 {{ $slot }}
             </div>
         </div>
+    @include('components.admin-chat')
+
     </body>
 </html>

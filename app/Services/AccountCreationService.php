@@ -11,176 +11,174 @@ class AccountCreationService
 {
     /**
      * Create accounts for a verified registration
+     * 
+     * Logic:
+     * 1. Parent registers child -> Create SIMY (student) + SITRA (parent)
+     * 2. Student registers self (18+) -> Create SIMY (student) with payment features
+     * 3. Student registers self (<18) -> Create SIMY (student) + SITRA (parent)
      */
-    public static function createAccountsForRegistration(Registration $registration)
-    {
-        $serviceType = $registration->program->service_type;
-
-        if ($serviceType === 'SIMY') {
-            return self::createSimyAccounts($registration);
-        } elseif ($serviceType === 'SITRA') {
-            return self::createSitraAccounts($registration);
-        } elseif ($serviceType === 'SINTAS') {
-            return self::createSintasAccount($registration);
-        }
-
-        return false;
-    }
-
-    /**
-     * Create SIMY accounts (student + parent if applicable)
-     */
-    private static function createSimyAccounts(Registration $registration)
+    public static function createAccountsForRegistration(Registration $registration): array
     {
         $accounts = [];
 
-        // Create student account
-        $studentAccount = self::createStudentAccount($registration, 'SIMY');
-        if ($studentAccount) {
-            $accounts[] = $studentAccount;
-        }
-
-        // Create parent account if parent registration
-        if ($registration->is_parent_register) {
-            $parentAccount = self::createParentAccount($registration, 'SIMY');
-            if ($parentAccount) {
-                $accounts[] = $parentAccount;
+        if (!$registration->is_self_register) {
+            // Parent is registering child
+            $accounts = self::createParentChildAccounts($registration);
+        } else {
+            // Student is registering self
+            if ($registration->student_age >= 18) {
+                // Adult student - create SIMY with payment features
+                $accounts = self::createAdultStudentAccount($registration);
+            } else {
+                // Underage student - create SIMY + SITRA for parent
+                $accounts = self::createUnderageStudentAccounts($registration);
             }
         }
 
+        // Send credentials via email
+        foreach ($accounts as $account) {
+            self::sendAccountCredentials($account);
+        }
+
         return $accounts;
     }
 
     /**
-     * Create SITRA accounts (student + parent if applicable)
+     * Create accounts when parent registers child
+     * SIMY for student + SITRA for parent
      */
-    private static function createSitraAccounts(Registration $registration)
+    private static function createParentChildAccounts(Registration $registration): array
     {
         $accounts = [];
 
-        // Create student account
-        $studentAccount = self::createStudentAccount($registration, 'SITRA');
+        // Create SIMY account for student (LMS access)
+        $studentAccount = self::createStudentSimyAccount($registration);
         if ($studentAccount) {
-            $accounts[] = $studentAccount;
+            $accounts['student'] = $studentAccount;
         }
 
-        // Create parent account if parent registration
-        if ($registration->is_parent_register) {
-            $parentAccount = self::createParentAccount($registration, 'SITRA');
-            if ($parentAccount) {
-                $accounts[] = $parentAccount;
-            }
+        // Create SITRA account for parent (payment & monitoring)
+        $parentAccount = self::createParentSitraAccount($registration);
+        if ($parentAccount) {
+            $accounts['parent'] = $parentAccount;
         }
 
         return $accounts;
     }
 
     /**
-     * Create SINTAS account (single account for adult)
+     * Create account for adult student (18+)
+     * SIMY with payment management features
      */
-    private static function createSintasAccount(Registration $registration)
+    private static function createAdultStudentAccount(Registration $registration): array
     {
         $accounts = [];
 
-        // For SINTAS, create single account for the registrant
-        $account = self::createAdultAccount($registration);
-        if ($account) {
-            $accounts[] = $account;
-        }
-
-        return $accounts;
-    }
-
-    /**
-     * Create student account
-     */
-    private static function createStudentAccount(Registration $registration, string $portal)
-    {
-        $username = self::generateUsername($registration->student_name, 'student');
         $password = self::generatePassword();
+        $email = $registration->student_email ?? self::generateStudentEmail($registration);
 
         $user = User::create([
             'name' => $registration->student_name,
-            'email' => self::generateStudentEmail($registration),
+            'email' => $email,
             'password' => Hash::make($password),
             'role' => 'student',
-            'department' => strtolower($portal),
+            'department' => 'simy',
             'position' => 'student',
             'level' => 'user',
         ]);
 
-        // Store generated credentials for email sending
         $user->generated_password = $password;
-        $user->portal = $portal;
+        $user->portal = 'SIMY';
+        $user->has_payment_features = true; // Flag for payment features
+
+        $accounts['student'] = $user;
+
+        return $accounts;
+    }
+
+    /**
+     * Create accounts for underage student (<18)
+     * SIMY for student + SITRA for parent
+     */
+    private static function createUnderageStudentAccounts(Registration $registration): array
+    {
+        $accounts = [];
+
+        // Create SIMY account for student
+        $studentAccount = self::createStudentSimyAccount($registration);
+        if ($studentAccount) {
+            $accounts['student'] = $studentAccount;
+        }
+
+        // Create SITRA account for parent
+        $parentAccount = self::createParentSitraAccount($registration);
+        if ($parentAccount) {
+            $accounts['parent'] = $parentAccount;
+        }
+
+        return $accounts;
+    }
+
+    /**
+     * Create SIMY account for student (LMS access)
+     */
+    private static function createStudentSimyAccount(Registration $registration): User
+    {
+        $password = self::generatePassword();
+        $email = $registration->student_email ?? self::generateStudentEmail($registration);
+
+        $user = User::create([
+            'name' => $registration->student_name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'role' => 'student',
+            'department' => 'simy',
+            'position' => 'student',
+            'level' => 'user',
+        ]);
+
+        $user->generated_password = $password;
+        $user->portal = 'SIMY';
 
         return $user;
     }
 
     /**
-     * Create parent account
+     * Create SITRA account for parent (payment & monitoring)
      */
-    private static function createParentAccount(Registration $registration, string $portal)
+    private static function createParentSitraAccount(Registration $registration): User
     {
-        $username = self::generateUsername($registration->parent_name ?? $registration->student_name . '_parent', 'parent');
         $password = self::generatePassword();
+        $email = $registration->parent_email ?? self::generateParentEmail($registration);
 
         $user = User::create([
-            'name' => $registration->parent_name ?? 'Parent of ' . $registration->student_name,
-            'email' => self::generateParentEmail($registration),
+            'name' => $registration->parent_name,
+            'email' => $email,
             'password' => Hash::make($password),
             'role' => 'parent',
-            'department' => strtolower($portal),
+            'department' => 'sitra',
             'position' => 'parent',
             'level' => 'user',
         ]);
 
-        // Store generated credentials for email sending
         $user->generated_password = $password;
-        $user->portal = $portal;
+        $user->portal = 'SITRA';
 
         return $user;
     }
 
     /**
-     * Create adult account for SINTAS
+     * Send account credentials via email
      */
-    private static function createAdultAccount(Registration $registration)
+    private static function sendAccountCredentials(User $user): void
     {
-        $username = self::generateUsername($registration->student_name, 'adult');
-        $password = self::generatePassword();
-
-        $user = User::create([
-            'name' => $registration->student_name,
-            'email' => $registration->student_email ?? self::generateStudentEmail($registration),
-            'password' => Hash::make($password),
-            'role' => 'student',
-            'department' => 'sintas',
-            'position' => 'student',
-            'level' => 'user',
-        ]);
-
-        // Store generated credentials for email sending
-        $user->generated_password = $password;
-        $user->portal = 'SINTAS';
-
-        return $user;
-    }
-
-    /**
-     * Generate unique username
-     */
-    private static function generateUsername(string $name, string $type): string
-    {
-        $base = Str::slug($name);
-        $username = $base . '_' . $type;
-        $counter = 1;
-
-        while (User::where('name', $username)->exists()) {
-            $username = $base . '_' . $type . '_' . $counter;
-            $counter++;
-        }
-
-        return $username;
+        RegistrationEmailService::sendAccountCredentials(
+            $user->email,
+            $user->name,
+            $user->email, // Using email as username
+            $user->generated_password,
+            $user->portal
+        );
     }
 
     /**
@@ -188,7 +186,7 @@ class AccountCreationService
      */
     private static function generatePassword(): string
     {
-        return Str::random(8);
+        return Str::random(10) . rand(10, 99);
     }
 
     /**
@@ -197,11 +195,11 @@ class AccountCreationService
     private static function generateStudentEmail(Registration $registration): string
     {
         $base = Str::slug($registration->student_name);
-        $email = $base . '@simy.local'; // Temporary email, should be replaced with actual domain
+        $email = $base . '@student.sibali.id';
         $counter = 1;
 
         while (User::where('email', $email)->exists()) {
-            $email = $base . $counter . '@simy.local';
+            $email = $base . $counter . '@student.sibali.id';
             $counter++;
         }
 
@@ -213,12 +211,12 @@ class AccountCreationService
      */
     private static function generateParentEmail(Registration $registration): string
     {
-        $base = Str::slug($registration->parent_name ?? $registration->student_name . '_parent');
-        $email = $base . '@sitra.local'; // Temporary email, should be replaced with actual domain
+        $base = Str::slug($registration->parent_name ?? $registration->student_name . '-parent');
+        $email = $base . '@parent.sibali.id';
         $counter = 1;
 
         while (User::where('email', $email)->exists()) {
-            $email = $base . $counter . '@sitra.local';
+            $email = $base . $counter . '@parent.sibali.id';
             $counter++;
         }
 

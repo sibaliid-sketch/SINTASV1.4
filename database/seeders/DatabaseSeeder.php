@@ -133,5 +133,37 @@ class DatabaseSeeder extends Seeder
                 'level' => 'Senior',
             ]
         );
+
+        // PR Department users
+        User::updateOrCreate(
+            ['email' => 'pr.manager@sintasv1.test'],
+            [
+                'name' => 'PR Manager',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'pr',
+                'position' => 'Manager',
+                'level' => 'Senior',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'pr.staff@sintasv1.test'],
+            [
+                'name' => 'PR Staff',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'pr',
+                'position' => 'Staff',
+                'level' => 'Mid',
+            ]
+        );
+
+        // Call other seeders
+        $this->call([
+            ServiceSeeder::class,
+            ProgramCsvSeeder::class,
+            AttendanceSeeder::class,
+        ]);
     }
 }

@@ -1,7 +1,10 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\AdminChatController;
 use App\Http\Controllers\ChatController;
+=======
+>>>>>>> 2ac5c76e5d201978a0c0f7f17c1869c92a162d79
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
@@ -10,7 +13,10 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SimyController;
 use App\Http\Controllers\SitraController;
 use App\Http\Controllers\SintasController;
+<<<<<<< HEAD
 use App\Http\Controllers\SocialAuthController;
+=======
+>>>>>>> 2ac5c76e5d201978a0c0f7f17c1869c92a162d79
 use Illuminate\Support\Facades\Route;
 
 /*

@@ -12,7 +12,13 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
+>>>>>>> 2ac5c76e5d201978a0c0f7f17c1869c92a162d79
+=======
+        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
+=======
+        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
+>>>>>>> 2ac5c76e5d201978a0c0f7f17c1869c92a162d79
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -146,6 +152,7 @@
                 </div>
             @endif
         </footer>
+<<<<<<< HEAD
 
         <!-- Floating Admin Chat Toggle -->
         <div class="fixed bottom-4 right-4 z-50">
@@ -226,5 +233,7 @@
                 }
             });
         </script>
+=======
+>>>>>>> 2ac5c76e5d201978a0c0f7f17c1869c92a162d79
     </body>
 </html>

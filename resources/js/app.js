@@ -104,3 +104,156 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(item);
     });
 });
+
+// Chat functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const chatToggle = document.getElementById('admin-chat-toggle');
+    const chatWindow = document.getElementById('admin-chat-window');
+    const chatClose = document.getElementById('admin-chat-close');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const chatMessages = document.getElementById('chat-messages');
+
+    if (chatToggle && chatWindow) {
+        // Toggle chat window with animation
+        chatToggle.addEventListener('click', function() {
+            if (chatWindow.classList.contains('hidden')) {
+                chatWindow.classList.remove('hidden');
+                setTimeout(() => {
+                    chatWindow.classList.remove('scale-95', 'opacity-0');
+                    chatWindow.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            } else {
+                chatWindow.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    chatWindow.classList.add('hidden');
+                    chatWindow.classList.remove('scale-100', 'opacity-100');
+                }, 300);
+            }
+        });
+
+        // Close chat window
+        if (chatClose) {
+            chatClose.addEventListener('click', function() {
+                chatWindow.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    chatWindow.classList.add('hidden');
+                    chatWindow.classList.remove('scale-100', 'opacity-100');
+                }, 300);
+            });
+        }
+
+        // Get current time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        let lastMessageId = 0;
+
+        // Function to add message to UI
+        function addMessageToUI(messageData) {
+            const messageDiv = document.createElement('div');
+            if (messageData.is_mine) {
+                messageDiv.className = 'flex justify-end animate-slide-in-right';
+                messageDiv.innerHTML = `
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-2xl max-w-xs shadow-lg">
+                        <div class="text-xs text-blue-100 mb-1">Anda</div>
+                        <div class="text-sm">${messageData.message}</div>
+                        <div class="text-xs text-blue-200 mt-1 text-right">${messageData.created_at}</div>
+                    </div>
+                `;
+            } else {
+                const senderLabel = messageData.sender_type === 'ai' ? 'AI Assistant' : 'Admin';
+                const senderColor = messageData.sender_type === 'ai' ? 'green' : 'purple';
+                messageDiv.className = 'flex justify-start animate-slide-in-left';
+                messageDiv.innerHTML = `
+                    <div class="bg-white border border-gray-200 p-3 rounded-2xl max-w-xs shadow-lg">
+                        <div class="text-xs text-gray-500 mb-1 flex items-center">
+                            <div class="w-2 h-2 bg-${senderColor}-400 rounded-full mr-1"></div>
+                            ${senderLabel}
+                        </div>
+                        <div class="text-sm text-gray-800">${messageData.message}</div>
+                        <div class="text-xs text-gray-400 mt-1">${messageData.created_at}</div>
+                    </div>
+                `;
+            }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to fetch new messages
+        function fetchNewMessages() {
+            fetch(`/chat/messages?last_id=${lastMessageId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.messages.forEach(message => {
+                    addMessageToUI(message);
+                    lastMessageId = Math.max(lastMessageId, message.id);
+                });
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+        }
+
+        // Send message function
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Clear input
+                chatInput.value = '';
+                chatSend.disabled = true;
+
+                // Send to server
+                fetch('/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Fetch new messages to update UI
+                        fetchNewMessages();
+                        chatSend.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    chatSend.disabled = false;
+                });
+            }
+        }
+
+        // Start polling for new messages
+        setInterval(fetchNewMessages, 3000); // Poll every 3 seconds
+
+        // Enable/disable send button based on input
+        if (chatInput) {
+            chatInput.addEventListener('input', function() {
+                chatSend.disabled = !this.value.trim();
+            });
+        }
+
+        // Send on button click
+        if (chatSend) {
+            chatSend.addEventListener('click', sendMessage);
+        }
+
+        // Send on enter key
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+    }
+});

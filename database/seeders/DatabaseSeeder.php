@@ -17,80 +17,121 @@ class DatabaseSeeder extends Seeder
         // Create test users for role-based routing testing
 
         // Student user
-        User::factory()->create([
-            'name' => 'Student Test',
-            'email' => 'student@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'student',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'student@sintasv1.test'],
+            [
+                'name' => 'Student Test',
+                'password' => Hash::make('password123'),
+                'role' => 'student',
+            ]
+        );
 
         // Guardian user
-        User::factory()->create([
-            'name' => 'Guardian Test',
-            'email' => 'guardian@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'guardian',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'guardian@sintasv1.test'],
+            [
+                'name' => 'Guardian Test',
+                'password' => Hash::make('password123'),
+                'role' => 'guardian',
+            ]
+        );
 
-        // Karyawan users with different departments, positions, levels
-        User::factory()->create([
-            'name' => 'Executive Admin',
-            'email' => 'executive@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'department' => 'operations',
-            'position' => 'Executive',
-            'level' => 'Senior',
-        ]);
+        // Superadmin user (Executive level - All access)
+        User::updateOrCreate(
+            ['email' => 'superadmin@sintasv1.test'],
+            [
+                'name' => 'Superadmin Executive',
+                'password' => Hash::make('password123'),
+                'role' => 'superadmin',
+                'department' => 'operations',
+                'position' => 'Executive',
+                'level' => 'Senior',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Manager Operations',
-            'email' => 'manager.ops@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
-            'department' => 'operations',
-            'position' => 'Manager',
-            'level' => 'Senior',
-        ]);
+        // Admin Operational user (Operational staff - Only operational dashboard)
+        User::updateOrCreate(
+            ['email' => 'admin.ops@sintasv1.test'],
+            [
+                'name' => 'Admin Operational',
+                'password' => Hash::make('password123'),
+                'role' => 'admin_operational',
+                'department' => 'operations',
+                'position' => 'Staff',
+                'level' => 'Mid',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Supervisor Sales',
-            'email' => 'supervisor.sales@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
-            'department' => 'sales-marketing',
-            'position' => 'Supervisor',
-            'level' => 'Mid',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'manager.ops@sintasv1.test'],
+            [
+                'name' => 'Manager Operations',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'operations',
+                'position' => 'Manager',
+                'level' => 'Senior',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Staff Finance',
-            'email' => 'staff.finance@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
-            'department' => 'finance',
-            'position' => 'Staff',
-            'level' => 'Junior',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'supervisor.sales@sintasv1.test'],
+            [
+                'name' => 'Supervisor Sales',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'sales-marketing',
+                'position' => 'Supervisor',
+                'level' => 'Mid',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'IT Specialist',
-            'email' => 'it.staff@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
-            'department' => 'it',
-            'position' => 'Staff',
-            'level' => 'Senior',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'staff.finance@sintasv1.test'],
+            [
+                'name' => 'Staff Finance',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'finance',
+                'position' => 'Staff',
+                'level' => 'Junior',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Academic Coordinator',
-            'email' => 'academic.coord@sintasv1.test',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
-            'department' => 'academic',
-            'position' => 'Manager',
-            'level' => 'Senior',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'it.staff@sintasv1.test'],
+            [
+                'name' => 'IT Specialist',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'it',
+                'position' => 'Staff',
+                'level' => 'Senior',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'academic.coord@sintasv1.test'],
+            [
+                'name' => 'Academic Coordinator',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'academic',
+                'position' => 'Manager',
+                'level' => 'Senior',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'engagement.retention@sintasv1.test'],
+            [
+                'name' => 'Engagement & Retention Manager',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+                'department' => 'engagement-retention',
+                'position' => 'Manager',
+                'level' => 'Senior',
+            ]
+        );
     }
 }

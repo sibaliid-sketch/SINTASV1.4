@@ -1,9 +1,14 @@
-# TODO: Add Floating Chat Toggle for AI-Powered Admin Chat
+# TODO: Fix CSS Conflicts in Blade Files
 
-## Tasks
-- [x] Add floating chat toggle button to resources/views/layouts/app.blade.php
-- [x] Add floating chat toggle button to resources/views/layouts/guest.blade.php
-- [x] Add floating chat toggle button to resources/views/welcome.blade.php
-- [x] Add floating chat toggle button to resources/views/auth/login.blade.php
-- [x] Test the toggle on various pages
-- [ ] Implement chat functionality (modal, API, etc.) if needed
+## Tasks to Complete
+- [x] Fix inline-block vs block in resources/views/investing-for-investor.blade.php (line 315)
+- [x] Fix hidden vs flex in resources/views/kurikulum-sibali-id.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/layouts/app.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/services.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/welcome.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/sibalion-karyawan-kami.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/contact.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/auth/login.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/articles.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/about.blade.php (admin-chat-window div)
+- [x] Fix hidden vs flex in resources/views/layouts/guest.blade.php (admin-chat-window div)

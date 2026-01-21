@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 class SintasController extends Controller
 {
     /**
+     * Display the SINTAS welcome page.
+     */
+    public function welcome()
+    {
+        return view('sintas.welcome');
+    }
+
+    /**
      * Display the SINTAS dashboard.
      */
     public function index()
@@ -148,6 +156,13 @@ class SintasController extends Controller
      */
     public function operations()
     {
+        $user = auth()->user();
+
+        // Allow superadmin (all access) or admin_operational (only operational dashboard)
+        if ($user->role !== 'superadmin' && $user->role !== 'admin_operational') {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('sintas.operations');
     }
 

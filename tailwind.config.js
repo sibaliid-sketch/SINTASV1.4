@@ -9,6 +9,8 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
+    darkMode: 'class',
+
     theme: {
         extend: {
             fontFamily: {
@@ -22,7 +24,7 @@ export default {
                 'stencil': ['Stencil', 'serif'],
                 'avenir': ['Montserrat', 'sans-serif'], // Fallback for Avenir
                 'typewriter': ['Courier New', 'monospace'],
-                'garamond': ['Garamond', 'serif'],
+                'garamond': ['EB Garamond', 'Garamond', 'serif'],
             },
             colors: {
                 primary: {

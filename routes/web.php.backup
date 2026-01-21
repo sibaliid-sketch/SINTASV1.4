@@ -43,22 +43,6 @@ Route::get('/contact', function () {
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
-Route::get('/sibalion-karyawan-kami', function () {
-    return view('sibalion-karyawan-kami');
-});
-
-Route::get('/kurikulum-sibali-id', function () {
-    return view('kurikulum-sibali-id');
-});
-
-Route::get('/event', function () {
-    return view('event');
-});
-
-Route::get('/investing-for-investor', function () {
-    return view('investing-for-investor');
-});
-
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
 // Google OAuth Routes
@@ -72,7 +56,6 @@ Route::get('/simy', [SimyController::class, 'index'])->middleware(['auth', 'veri
 Route::get('/sitra', [SitraController::class, 'index'])->middleware(['auth', 'verified'])->name('sitra');
 
 Route::get('/sintas', [SintasController::class, 'index'])->middleware(['auth', 'verified'])->name('sintas');
-Route::get('/sintas/welcome', [SintasController::class, 'welcome'])->middleware(['auth', 'verified'])->name('sintas.welcome');
 
 Route::get('/overview', [SintasController::class, 'overview'])->middleware(['auth', 'verified'])->name('overview');
 
@@ -119,8 +102,6 @@ Route::prefix('register')->name('registration.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
-    Route::post('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Admin Chat Console

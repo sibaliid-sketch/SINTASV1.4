@@ -57,9 +57,11 @@ echo ║  🌐 Application URL:  http://localhost:8000                   ║
 echo ║  🌐 Vite Dev URL:     http://localhost:5173                   ║
 echo ║                                                                ║
 echo ║  📚 Access Test Accounts:                                      ║
-echo ║     Admin:   admin@sintasv1.test / password123                ║
+echo ║     Superadmin: superadmin@sintasv1.test / password123         ║
+echo ║     Admin Ops:  admin.ops@sintasv1.test / password123          ║
 echo ║     User:    test@sintasv1.test / password123                 ║
 echo ║     Manager: manager@sintasv1.test / password123              ║
+echo ║     Eng&Ret: engagement.retention@sintasv1.test / password123 ║
 echo ║                                                                ║
 echo ║  💡 PENTING:                                                   ║
 echo ║     - Biarkan Vite Dev Server tetap running                    ║

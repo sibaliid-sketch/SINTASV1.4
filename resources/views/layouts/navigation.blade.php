@@ -2,7 +2,7 @@
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <div class="flex">
+            <div class="flex flex-1">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
@@ -11,8 +11,8 @@
                 </div>
 
                 <!-- Search Bar -->
-                <div class="hidden sm:flex sm:ms-10 sm:flex-1 sm:justify-center mt-2">
-                    <div class="w-full max-w-4xl">
+                <div class="hidden sm:flex sm:ml-8 sm:w-1/2 mt-2">
+                    <div class="w-full">
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

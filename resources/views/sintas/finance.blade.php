@@ -1,15 +1,8 @@
 <x-app-layout>
             <x-slot name="header">
-                <div class="flex items-center">
-                    <a href="{{ route('sintas') }}" class="mr-4 text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </a>
-                    <h2 class="font-semibold text-xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-tight">
-                        {{ __('SINTAS - Sistem Internal (Finance)') }}
-                    </h2>
-                </div>
+                <h2 class="font-semibold text-xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-tight">
+                    {{ __('SINTAS - Sistem Internal (Finance)') }}
+                </h2>
             </x-slot>
 
     <!-- Tab Navigation -->

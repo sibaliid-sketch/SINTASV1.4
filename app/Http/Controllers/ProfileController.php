@@ -38,6 +38,57 @@ class ProfileController extends Controller
     }
 
     /**
+     * Update the user's avatar.
+     */
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && \Storage::disk('public')->exists('avatars/' . $user->avatar)) {
+                \Storage::disk('public')->delete('avatars/' . $user->avatar);
+            }
+
+            // Generate unique filename
+            $filename = time() . '_' . uniqid() . '.jpg';
+
+            // Store the file
+            $path = $request->file('avatar')->storeAs('avatars', $filename, 'public');
+
+            // Update user
+            $user->update(['avatar' => $filename]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Avatar updated successfully']);
+    }
+
+    /**
+     * Update the user's preferences.
+     */
+    public function updatePreferences(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'language' => 'required|in:en,id',
+            'email_notifications' => 'boolean',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'language' => $request->language,
+            'notification_settings' => array_merge($user->notification_settings ?? [], [
+                'email_notifications' => $request->boolean('email_notifications'),
+            ]),
+        ]);
+
+        return Redirect::route('profile.edit')->with('status', 'preferences-updated');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse

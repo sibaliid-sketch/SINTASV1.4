@@ -12,7 +12,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -154,5 +154,77 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     <circle cx="9" cy="7" r="1"></circle>
                     <circle cx="15" cy="7" r="1"></circle>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Admin Chat Window -->
+        <div id="admin-chat-window" class="fixed bottom-20 right-4 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200/50 z-40 flex flex-col transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+            <div class="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white p-4 rounded-t-2xl flex justify-between items-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 animate-pulse"></div>
+                <div class="relative flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span class="font-semibold text-sm">Chat Admin AI</span>
+                </div>
+                <button id="admin-chat-close" class="relative text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white">
+                <!-- Messages will be added here -->
+                <div class="text-center text-gray-500 text-xs py-4">
+                    Selamat datang! Bagaimana saya bisa membantu Anda hari ini?
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-200/50 bg-gray-50/50">
+                <div class="flex space-x-2">
+                    <input id="chat-input" type="text" class="flex-1 px-4 py-3 border border-gray-300/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 bg-white/80 backdrop-blur-sm transition-all duration-200 text-sm" placeholder="Ketik pesan Anda...">
+                    <button id="chat-send" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-4 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="text-xs text-gray-400 mt-2 text-center">
+                    Pesan Anda akan dijawab segera
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Apply user theme on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                const userTheme = '{{ auth()->check() ? auth()->user()->theme ?? "light" : "light" }}';
+
+                function applyTheme(theme) {
+                    const html = document.documentElement;
+                    if (theme === 'dark') {
+                        html.classList.add('dark');
+                    } else if (theme === 'light') {
+                        html.classList.remove('dark');
+                    } else if (theme === 'auto') {
+                        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                            html.classList.add('dark');
+                        } else {
+                            html.classList.remove('dark');
+                        }
+                    }
+                }
+
+                // Apply initial theme
+                applyTheme(userTheme);
+
+                // Handle system theme change for auto mode
+                if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                        if (userTheme === 'auto') {
+                            applyTheme('auto');
+                        }
+                    });
+                }
+            });
+        </script>
     </body>
 </html>

@@ -3,15 +3,50 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contact - Sibali.id</title>
+    <title>Kurikulum Sibali.id - Sibali.id</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700|montserrat:400,500,600,700&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulseSlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        .animate-slide-in-left { animation: slideInLeft 0.8s ease-out forwards; opacity: 0; }
+        .animate-slide-in-right { animation: slideInRight 0.8s ease-out forwards; opacity: 0; }
+        .animate-pulse-slow { animation: pulseSlow 2s infinite; }
+        .animation-delay-100 { animation-delay: 0.1s; }
+        .animation-delay-200 { animation-delay: 0.2s; }
+        .animation-delay-300 { animation-delay: 0.3s; }
+        .animation-delay-400 { animation-delay: 0.4s; }
+        .animation-delay-500 { animation-delay: 0.5s; }
+        .animation-delay-600 { animation-delay: 0.6s; }
+        .animation-delay-700 { animation-delay: 0.7s; }
+        .animation-delay-800 { animation-delay: 0.8s; }
+        .animation-delay-900 { animation-delay: 0.9s; }
+        .animation-delay-1100 { animation-delay: 1.1s; }
+        .glow-on-hover:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .quote-reveal { opacity: 0; transition: opacity 0.5s ease; }
+        .vision-container:hover .quote-reveal { opacity: 1; }
+    </style>
 </head>
-<body class="font-display antialiased bg-gradient-to-br from-slate-50 via-white to-gray-100 min-h-screen">
+<body class="font-display antialiased bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen">
     <header class="glass-effect premium-shadow border-b border-white/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-6">
@@ -53,109 +88,67 @@
         </div>
     </header>
 
-    <main class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-4">Hubungi Kami</h2>
-                <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
-                <p class="text-xl text-gray-600 mt-4 max-w-2xl mx-auto">Siap membantu Anda dengan pertanyaan atau kebutuhan layanan pendidikan. Hubungi kami dan kami akan merespons secepat mungkin.</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- Contact Form -->
-                <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50">
-                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Kirim Pesan</h3>
-                    <form class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" placeholder="Masukkan nama Anda">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                            <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" placeholder="email@contoh.com">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subjek</label>
-                            <select class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                                <option>Pilih subjek</option>
-                                <option>Bimbingan Belajar</option>
-                                <option>Kursus Bahasa Inggris</option>
-                                <option>Informasi Sistem</option>
-                                <option>Lainnya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Pesan</label>
-                            <textarea class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" rows="5" placeholder="Tuliskan pesan Anda di sini..."></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg">
-                            Kirim Pesan
-                        </button>
-                    </form>
+    <main class="py-16">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-6 float">Kurikulum Sibali.id</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">Kurikulum Terintegrasi untuk Pengembangan Kompetensi Holistik</p>
                 </div>
 
-                <!-- Contact Info -->
-                <div class="space-y-8">
-                    <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50">
-                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">Informasi Kontak</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900">Alamat</p>
-                                    <p class="text-gray-600">Jl. Pendidikan No. 123, Jakarta Pusat</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900">Telepon</p>
-                                    <p class="text-gray-600">+62 21 1234 5678</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900">Email</p>
-                                    <p class="text-gray-600">info@sibali.id</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50">
-                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">Jam Operasional</h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Senin - Jumat</span>
-                                <span class="font-semibold text-gray-900">08:00 - 17:00 WIB</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Sabtu</span>
-                                <span class="font-semibold text-gray-900">08:00 - 15:00 WIB</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Minggu</span>
-                                <span class="font-semibold text-gray-900">Tutup</span>
-                            </div>
+                <!-- Hero Image -->
+                <div class="relative mb-20">
+                    <div class="bg-gradient-to-r from-green-500 to-teal-600 rounded-3xl p-1 shadow-2xl">
+                        <div class="bg-white rounded-3xl overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=600&fit=crop&crop=center" alt="Curriculum Excellence" class="w-full h-96 object-cover">
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Content Section -->
+        <section class="py-16 bg-white/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h3 class="text-3xl font-serif font-bold text-gray-900 mb-6">Pendekatan Kurikulum Modern</h3>
+                    <p class="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">Kurikulum Sibali.id dirancang dengan pendekatan terintegrasi yang menggabungkan pembelajaran akademik, keterampilan praktis, dan pengembangan karakter untuk mempersiapkan siswa menghadapi tantangan dunia nyata.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-gray-200/50 text-center hover:shadow-xl transition-all duration-500 hover:scale-105">
+                        <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-serif font-semibold text-gray-900 mb-4">Berbasis Kompetensi</h4>
+                        <p class="text-gray-600 leading-relaxed">Fokus pada pengembangan keterampilan dan kompetensi yang dibutuhkan di dunia kerja modern.</p>
+                    </div>
+
+                    <div class="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-gray-200/50 text-center hover:shadow-xl transition-all duration-500 hover:scale-105">
+                        <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-serif font-semibold text-gray-900 mb-4">Digital-First Learning</h4>
+                        <p class="text-gray-600 leading-relaxed">Integrasi teknologi digital dalam setiap aspek pembelajaran untuk pengalaman interaktif dan personal.</p>
+                    </div>
+
+                    <div class="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-gray-200/50 text-center hover:shadow-xl transition-all duration-500 hover:scale-105">
+                        <div class="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-serif font-semibold text-gray-900 mb-4">Kolaboratif & Interaktif</h4>
+                        <p class="text-gray-600 leading-relaxed">Pendekatan pembelajaran yang mendorong kerja sama tim dan interaksi aktif antar siswa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Floating Admin Chat Toggle -->
@@ -285,4 +278,5 @@
             </div>
         </div>
     </footer>
-    
+</body>
+</html>

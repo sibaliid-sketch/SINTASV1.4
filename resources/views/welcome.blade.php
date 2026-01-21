@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Candara:wght@400;700&family=Perpetua:wght@400;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-display antialiased bg-gradient-to-br from-slate-50 via-white to-gray-100 min-h-screen">
     <header class="glass-effect premium-shadow border-b border-white/20">
@@ -19,11 +19,30 @@
                     <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Sibali.id</h1>
                 </div>
                 <nav class="flex space-x-8">
-                    <a href="/" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Home</a>
-                    <a href="/about" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">About</a>
-                    <a href="/services" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Services</a>
-                    <a href="/articles" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Articles & News</a>
-                    <a href="/contact" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Contact</a>
+                    <a href="/" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Kenalan Yuk!</a>
+                    <a href="/about" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Tentang kami</a>
+                    <a href="/services" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Layanan kami</a>
+                    <a href="/articles" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Pustaka</a>
+                    <a href="/contact" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Hubungi Kami</a>
+
+                    <!-- Info Lainnya Dropdown -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = ! open" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium flex items-center">
+                            Info Lainnya
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                            <div class="py-1">
+                                <a href="/sibalion-karyawan-kami" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sibalion! Karyawan kami!</a>
+                                <a href="/kurikulum-sibali-id" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kurikulum Sibali.id</a>
+                                <a href="/event" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Event</a>
+                                <a href="/investing-for-investor" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Investing for Investor!</a>
+                            </div>
+                        </div>
+                    </div>
+
                     @auth
                         <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium">Dashboard</a>
                     @else
@@ -203,16 +222,39 @@
         </section>
     </main>
 
-    <!-- Floating Admin Chat Toggle -->
-    <div class="fixed bottom-4 right-4 z-[9999]">
-        <button id="admin-chat-toggle" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-full p-4 shadow-2xl transition-all duration-300 animate-pulse hover:animate-none hover:scale-110" title="Chat Admin AI">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                <circle cx="9" cy="7" r="1"></circle>
-                <circle cx="15" cy="7" r="1"></circle>
-            </svg>
-        </button>
-    </div>
+        <!-- Floating Admin Chat Toggle -->
+        <div class="fixed bottom-4 right-4 z-[9999]">
+            <button id="admin-chat-toggle" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-full p-4 shadow-2xl transition-all duration-300 animate-pulse hover:animate-none hover:scale-110" title="Chat Admin AI">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    <circle cx="9" cy="7" r="1"></circle>
+                    <circle cx="15" cy="7" r="1"></circle>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Admin Chat Window -->
+    <div id="admin-chat-window" class="fixed bottom-20 right-4 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-40 flex flex-col">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-t-lg flex justify-between items-center">
+                <span class="font-semibold">Chat Admin AI</span>
+                <button id="admin-chat-close" class="text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2">
+                <!-- Messages will be added here -->
+            </div>
+            <div class="p-3 border-t border-gray-200">
+                <div class="flex space-x-2">
+                    <input id="chat-input" type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ketik pesan...">
+                    <button id="chat-send" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Kirim
+                    </button>
+                </div>
+            </div>
+        </div>
 
     <!-- Artistic Footer -->
     <footer class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white py-12 relative overflow-hidden">

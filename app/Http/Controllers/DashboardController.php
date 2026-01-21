@@ -18,7 +18,7 @@ class DashboardController extends Controller
         } elseif ($user->role === 'guardian') {
             return redirect()->route('sitra');
         } elseif ($user->role === 'karyawan' || $user->role === 'admin') {
-            return redirect()->route('sintas');
+            return redirect()->route('sintas.welcome');
         } else {
             return view('dashboard');
         }

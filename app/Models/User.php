@@ -26,6 +26,37 @@ class User extends Authenticatable
         'department',
         'position',
         'level',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'avatar',
+        'bio',
+        'date_of_birth',
+        'phone',
+        'address',
+        'city',
+        'country',
+        'language',
+        'notification_settings',
+        'linkedin_url',
+        'twitter_url',
+        'github_url',
+        'website_url',
+        'two_factor_enabled',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'login_count',
+        'last_login_at',
+        'login_devices',
+        'profile_visible',
+        'show_email',
+        'show_activity',
+        'referral_code',
+        'referred_by',
+        'achievements',
+        'points',
+        'bookmarks',
     ];
 
     /**
@@ -46,10 +77,86 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'date_of_birth' => 'date',
+        'two_factor_confirmed_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'notification_settings' => 'array',
+        'two_factor_recovery_codes' => 'array',
+        'login_devices' => 'array',
+        'achievements' => 'array',
+        'bookmarks' => 'array',
+        'two_factor_enabled' => 'boolean',
+        'profile_visible' => 'boolean',
+        'show_email' => 'boolean',
+        'show_activity' => 'boolean',
     ];
 
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
+
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar ? asset('storage/avatars/' . $this->avatar) : null;
+    }
+
+    public function getInitialsAttribute()
+    {
+        $parts = explode(' ', $this->name);
+        return strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+    }
+
+    public function getProfileCompletionAttribute()
+    {
+        $fields = ['avatar', 'bio', 'phone', 'address', 'city', 'country', 'date_of_birth'];
+        $completed = 0;
+
+        foreach ($fields as $field) {
+            if (!empty($this->$field)) {
+                $completed++;
+            }
+        }
+
+        return round(($completed / count($fields)) * 100);
+    }
+
+    public function hasAchievement($achievement)
+    {
+        return in_array($achievement, $this->achievements ?? []);
+    }
+
+    public function addAchievement($achievement)
+    {
+        $achievements = $this->achievements ?? [];
+        if (!in_array($achievement, $achievements)) {
+            $achievements[] = $achievement;
+            $this->update(['achievements' => $achievements]);
+        }
+    }
+
+    public function addPoints($points)
+    {
+        $this->increment('points', $points);
     }
 }

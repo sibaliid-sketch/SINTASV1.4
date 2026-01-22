@@ -104,3 +104,40 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(item);
     });
 });
+// Sidebar expand/collapse functionality for SIMY, SITRA, and SINTAS
+function expandSidebar() {
+    const sidebar = document.getElementById('sidebar-expanded') || 
+                   document.getElementById('sidebar-expanded');
+    const collapsed = document.getElementById('sidebar-collapsed');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (sidebar) {
+        sidebar.classList.remove('hidden');
+    }
+    if (collapsed) {
+        collapsed.classList.add('hidden');
+    }
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
+}
+
+function collapseSidebar() {
+    const sidebar = document.getElementById('sidebar-expanded');
+    const collapsed = document.getElementById('sidebar-collapsed');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (sidebar) {
+        sidebar.classList.add('hidden');
+    }
+    if (collapsed) {
+        collapsed.classList.remove('hidden');
+    }
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+function closeSidebar() {
+    collapseSidebar();
+}

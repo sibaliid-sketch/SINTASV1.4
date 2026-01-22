@@ -1,16 +1,27 @@
 <?php
 
-use App\Http\Controllers\AdminChatController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DebugController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\SimyController;
-use App\Http\Controllers\SitraController;
-use App\Http\Controllers\SintasController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\SINTAS\AdminChatController;
+use App\Http\Controllers\SINTAS\SintasController;
+use App\Http\Controllers\SIMY\DashboardController as SimyDashboardController;
+use App\Http\Controllers\SIMY\SimyController;
+use App\Http\Controllers\SITRA\SitraController;
+use App\Http\Controllers\SIMY\MaterialController;
+use App\Http\Controllers\SIMY\AssignmentController;
+use App\Http\Controllers\SIMY\SubmissionController;
+use App\Http\Controllers\SIMY\QuizController;
+use App\Http\Controllers\SIMY\QuizAttemptController;
+use App\Http\Controllers\SIMY\ProgressController;
+use App\Http\Controllers\SIMY\CertificateController;
+use App\Http\Controllers\SIMY\MessageController;
+use App\Http\Controllers\SIMY\NoteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,9 +55,7 @@ Route::get('/contact', function () {
     return view('welcome.welcomeguest.contact');
 });
 
-Route::get('/articles', function () {
-    return view('welcome.welcomeguest.articles');
-})->name('articles.index');
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/sibalion-karyawan-kami', function () {
@@ -71,19 +80,26 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('google.callback');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+// Debug routes (only in dev)
+Route::middleware('auth')->group(function () {
+    Route::get('/debug/session', [DebugController::class, 'sessionDebug'])->name('debug.session');
+    Route::post('/debug/set-session', [DebugController::class, 'setSession'])->name('debug.set-session');
+});
 
-Route::get('/simy', [SimyController::class, 'index'])->middleware(['auth', 'verified'])->name('simy');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/sitra', [SitraController::class, 'index'])->middleware(['auth', 'verified'])->name('sitra');
+Route::get('/simy', [SimyController::class, 'index'])->name('simy');
 
-Route::get('/sintas', [SintasController::class, 'index'])->middleware(['auth', 'verified'])->name('sintas');
-Route::get('/sintas/welcome', [SintasController::class, 'welcome'])->middleware(['auth', 'verified'])->name('sintas.welcome');
+Route::get('/sitra', [SitraController::class, 'index'])->middleware('auth')->name('sitra');
+Route::get('/sitra/welcome', [SitraController::class, 'welcome'])->name('sitra.welcome');
 
-Route::get('/overview', [SintasController::class, 'overview'])->middleware(['auth', 'verified'])->name('overview');
+Route::get('/sintas', [SintasController::class, 'index'])->name('sintas');
+Route::get('/sintas/welcome', [SintasController::class, 'welcome'])->middleware('auth')->name('sintas.welcome');
+
+Route::get('/overview', [SintasController::class, 'overview'])->name('overview');
 
 // Department Routes
-Route::prefix('departments')->middleware(['auth', 'verified'])->name('departments.')->group(function () {
+Route::prefix('departments')->name('departments.')->middleware('auth')->group(function () {
     Route::get('/operations', [SintasController::class, 'operations'])->name('operations');
     Route::get('/operations/overview', [SintasController::class, 'overviewOperations'])->name('overview.operations');
     Route::get('/sales-marketing', [SintasController::class, 'salesMarketing'])->name('sales-marketing');
@@ -94,7 +110,7 @@ Route::prefix('departments')->middleware(['auth', 'verified'])->name('department
     Route::get('/product-rnd/overview', [SintasController::class, 'overviewProductRnd'])->name('overview.product-rnd');
     Route::get('/it', [SintasController::class, 'it'])->name('it');
     Route::get('/it/overview', [SintasController::class, 'overviewIt'])->name('overview.it');
-    Route::get('/it/chat-console', [SintasController::class, 'itChatConsole'])->name('it.chat-console');
+    Route::get('/operations/chat-console', [SintasController::class, 'operationsChatConsole'])->name('operations.chat-console');
     Route::get('/{department}/chat/messages/{user}', [SintasController::class, 'getChatMessages'])->name('chat.messages');
     Route::get('/academic', [SintasController::class, 'academic'])->name('academic');
     Route::get('/academic/overview', [SintasController::class, 'overviewAcademic'])->name('overview.academic');
@@ -103,6 +119,8 @@ Route::prefix('departments')->middleware(['auth', 'verified'])->name('department
     Route::get('/academic/schedules', [SintasController::class, 'academicSchedules'])->name('academic.schedules');
     Route::get('/engagement-retention', [SintasController::class, 'engagementRetention'])->name('engagement-retention');
     Route::get('/engagement-retention/overview', [SintasController::class, 'overviewEngagementRetention'])->name('overview.engagement-retention');
+    Route::get('/hr', [SintasController::class, 'hr'])->name('hr');
+    Route::get('/hr/overview', [SintasController::class, 'overviewHr'])->name('overview.hr');
     Route::get('/pr', [SintasController::class, 'pr'])->name('pr');
     Route::get('/pr/overview', [SintasController::class, 'overviewPr'])->name('overview.pr');
 
@@ -113,14 +131,87 @@ Route::prefix('departments')->middleware(['auth', 'verified'])->name('department
     Route::get('/sales-marketing/general', [SintasController::class, 'general'])->name('sales-marketing.general');
     Route::get('/finance/general', [SintasController::class, 'general'])->name('finance.general');
     Route::get('/product-rnd/general', [SintasController::class, 'general'])->name('product-rnd.general');
+    Route::get('/hr/general', [SintasController::class, 'general'])->name('hr.general');
     Route::get('/pr/general', [SintasController::class, 'general'])->name('pr.general');
     Route::get('/engagement-retention/general', [SintasController::class, 'general'])->name('engagement-retention.general');
+
+    // HRIS pages for all departments
+    Route::get('/operations/hris', [SintasController::class, 'hris'])->name('operations.hris');
+    Route::get('/it/hris', [SintasController::class, 'hris'])->name('it.hris');
+    Route::get('/academic/hris', [SintasController::class, 'hris'])->name('academic.hris');
+    Route::get('/sales-marketing/hris', [SintasController::class, 'hris'])->name('sales-marketing.hris');
+    Route::get('/finance/hris', [SintasController::class, 'hris'])->name('finance.hris');
+    Route::get('/product-rnd/hris', [SintasController::class, 'hris'])->name('product-rnd.hris');
+    Route::get('/hr/hris', [SintasController::class, 'hris'])->name('hr.hris');
+    Route::get('/pr/hris', [SintasController::class, 'hris'])->name('pr.hris');
+    Route::get('/engagement-retention/hris', [SintasController::class, 'hris'])->name('engagement-retention.hris');
+
+    // Beranda pages for each department
+    Route::get('/operations/beranda', [SintasController::class, 'beranda'])->name('operations.beranda');
+    Route::get('/it/beranda', [SintasController::class, 'beranda'])->name('it.beranda');
+    Route::get('/academic/beranda', [SintasController::class, 'beranda'])->name('academic.beranda');
+    Route::get('/sales-marketing/beranda', [SintasController::class, 'beranda'])->name('sales-marketing.beranda');
+    Route::get('/finance/beranda', [SintasController::class, 'beranda'])->name('finance.beranda');
+    Route::get('/product-rnd/beranda', [SintasController::class, 'beranda'])->name('product-rnd.beranda');
+    Route::get('/hr/beranda', [SintasController::class, 'beranda'])->name('hr.beranda');
+    Route::get('/pr/beranda', [SintasController::class, 'beranda'])->name('pr.beranda');
+    Route::get('/engagement-retention/beranda', [SintasController::class, 'beranda'])->name('engagement-retention.beranda');
 
     // Tools pages for departments that have tools
     Route::get('/operations/tools', [SintasController::class, 'tools'])->name('operations.tools');
     Route::get('/it/tools', [SintasController::class, 'tools'])->name('it.tools');
     Route::get('/academic/tools', [SintasController::class, 'tools'])->name('academic.tools');
+    Route::get('/finance/tools', [SintasController::class, 'tools'])->name('finance.tools');
+    Route::get('/sales-marketing/tools', [SintasController::class, 'tools'])->name('sales-marketing.tools');
+    Route::get('/product-rnd/tools', [SintasController::class, 'tools'])->name('product-rnd.tools');
+    Route::get('/hr/tools', [SintasController::class, 'tools'])->name('hr.tools');
+    Route::get('/pr/tools', [SintasController::class, 'tools'])->name('pr.tools');
+    Route::get('/engagement-retention/tools', [SintasController::class, 'tools'])->name('engagement-retention.tools');
+
+    // Additional pages for all departments
+    Route::get('/operations/ticket', [SintasController::class, 'ticket'])->name('operations.ticket');
+    Route::get('/it/ticket', [SintasController::class, 'ticket'])->name('it.ticket');
+    Route::get('/academic/ticket', [SintasController::class, 'ticket'])->name('academic.ticket');
+    Route::get('/sales-marketing/ticket', [SintasController::class, 'ticket'])->name('sales-marketing.ticket');
+    Route::get('/finance/ticket', [SintasController::class, 'ticket'])->name('finance.ticket');
+    Route::get('/product-rnd/ticket', [SintasController::class, 'ticket'])->name('product-rnd.ticket');
+    Route::get('/hr/ticket', [SintasController::class, 'ticket'])->name('hr.ticket');
+    Route::get('/pr/ticket', [SintasController::class, 'ticket'])->name('pr.ticket');
+    Route::get('/engagement-retention/ticket', [SintasController::class, 'ticket'])->name('engagement-retention.ticket');
+
+    Route::get('/operations/message', [SintasController::class, 'message'])->name('operations.message');
+    Route::get('/it/message', [SintasController::class, 'message'])->name('it.message');
+    Route::get('/academic/message', [SintasController::class, 'message'])->name('academic.message');
+    Route::get('/sales-marketing/message', [SintasController::class, 'message'])->name('sales-marketing.message');
+    Route::get('/finance/message', [SintasController::class, 'message'])->name('finance.message');
+    Route::get('/product-rnd/message', [SintasController::class, 'message'])->name('product-rnd.message');
+    Route::get('/hr/message', [SintasController::class, 'message'])->name('hr.message');
+    Route::get('/pr/message', [SintasController::class, 'message'])->name('pr.message');
+    Route::get('/engagement-retention/message', [SintasController::class, 'message'])->name('engagement-retention.message');
+
+    Route::get('/operations/notification', [SintasController::class, 'notification'])->name('operations.notification');
+    Route::get('/it/notification', [SintasController::class, 'notification'])->name('it.notification');
+    Route::get('/academic/notification', [SintasController::class, 'notification'])->name('academic.notification');
+    Route::get('/sales-marketing/notification', [SintasController::class, 'notification'])->name('sales-marketing.notification');
+    Route::get('/finance/notification', [SintasController::class, 'notification'])->name('finance.notification');
+    Route::get('/product-rnd/notification', [SintasController::class, 'notification'])->name('product-rnd.notification');
+    Route::get('/hr/notification', [SintasController::class, 'notification'])->name('hr.notification');
+    Route::get('/pr/notification', [SintasController::class, 'notification'])->name('pr.notification');
+    Route::get('/engagement-retention/notification', [SintasController::class, 'notification'])->name('engagement-retention.notification');
+
+    Route::get('/operations/setting', [SintasController::class, 'setting'])->name('operations.setting');
+    Route::get('/it/setting', [SintasController::class, 'setting'])->name('it.setting');
+    Route::get('/academic/setting', [SintasController::class, 'setting'])->name('academic.setting');
+    Route::get('/sales-marketing/setting', [SintasController::class, 'setting'])->name('sales-marketing.setting');
+    Route::get('/finance/setting', [SintasController::class, 'setting'])->name('finance.setting');
+    Route::get('/product-rnd/setting', [SintasController::class, 'setting'])->name('product-rnd.setting');
+    Route::get('/hr/setting', [SintasController::class, 'setting'])->name('hr.setting');
+    Route::get('/pr/setting', [SintasController::class, 'setting'])->name('pr.setting');
+    Route::get('/engagement-retention/setting', [SintasController::class, 'setting'])->name('engagement-retention.setting');
 });
+
+// IT Chat Console outside the departments group
+Route::get('/departments/it/chat-console', [SintasController::class, 'itChatConsole'])->name('it.chat-console');
 
 // Registration Routes (Pendaftaran Layanan & Program) - NEW 11-STEP FLOW
 use App\Http\Controllers\RegistrationControllerNew;
@@ -183,15 +274,79 @@ Route::middleware('auth')->group(function () {
 
     // Attendance System (Internal)
     Route::prefix('attendance')->name('attendance.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\AttendanceController::class, 'index'])->name('index');
-        Route::post('/check-in', [\App\Http\Controllers\AttendanceController::class, 'checkIn'])->name('check-in');
-        Route::post('/check-out', [\App\Http\Controllers\AttendanceController::class, 'checkOut'])->name('check-out');
-        Route::get('/history', [\App\Http\Controllers\AttendanceController::class, 'history'])->name('history');
+        Route::get('/', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'index'])->name('index');
+        Route::post('/check-in', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'checkIn'])->name('check-in');
+        Route::post('/check-out', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'checkOut'])->name('check-out');
+        Route::get('/history', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'history'])->name('history');
 
         // Admin routes
         Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\AttendanceController::class, 'adminIndex'])->name('index');
-            Route::get('/export', [\App\Http\Controllers\AttendanceController::class, 'export'])->name('export');
+            Route::get('/', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'adminIndex'])->name('index');
+            Route::get('/export', [\App\Http\Controllers\SINTAS\AttendanceController::class, 'export'])->name('export');
+        });
+    });
+
+    // SIMY - Student Learning Management System
+    Route::prefix('simy')->name('simy.')->group(function () {
+        Route::get('/beranda', [SimyController::class, 'beranda'])->name('beranda');
+        Route::get('/ticket', [SimyController::class, 'ticket'])->name('ticket');
+        Route::get('/message', [SimyController::class, 'message'])->name('message');
+        Route::get('/notification', [SimyController::class, 'notification'])->name('notification');
+        Route::get('/setting', [SimyController::class, 'setting'])->name('setting');
+        Route::get('/dashboard', [SimyDashboardController::class, 'index'])->name('dashboard');
+        
+        // Materials
+        Route::resource('materials', MaterialController::class)->only('index', 'show');
+        
+        // Assignments
+        Route::resource('assignments', AssignmentController::class)->only('index', 'show');
+        Route::post('assignments/{assignment}/submit', [SubmissionController::class, 'store'])->name('submissions.store');
+        
+        // Quizzes
+        Route::resource('quizzes', QuizController::class)->only('index', 'show');
+        Route::get('quizzes/{quiz}/attempt', [QuizAttemptController::class, 'create'])->name('quizzes.create-attempt');
+        Route::post('quizzes/{quiz}/attempt/{attempt}', [QuizAttemptController::class, 'store'])->name('quizzes.store-attempt');
+        
+        // Progress
+        Route::get('/progress', [ProgressController::class, 'index'])->name('progress.index');
+        
+        // Certificates
+        Route::resource('certificates', CertificateController::class)->only('index', 'show');
+        
+        // Notes
+        Route::resource('notes', NoteController::class)->only('store', 'destroy');
+        
+        // Forum & Messages
+        Route::get('/forum', [MessageController::class, 'index'])->name('forum.index');
+        Route::post('/forum/message', [MessageController::class, 'store'])->name('messages.store');
+        Route::post('/messages/{message}/react', [MessageController::class, 'addReaction'])->name('messages.react');
+    });
+
+    // SITRA - Customer Portal (Parents/Guardians)
+    Route::prefix('sitra')->name('sitra.')->group(function () {
+        Route::get('/beranda', [SitraController::class, 'beranda'])->name('beranda');
+        Route::get('/ticket', [SitraController::class, 'ticket'])->name('ticket');
+        Route::get('/message', [SitraController::class, 'message'])->name('message');
+        Route::get('/notification', [SitraController::class, 'notification'])->name('notification');
+        Route::get('/setting', [SitraController::class, 'setting'])->name('setting');
+        Route::get('/dashboard', [SitraController::class, 'index'])->name('dashboard');
+        Route::get('/settings', [SitraController::class, 'settings'])->name('settings');
+        Route::patch('/preferences', [SitraController::class, 'updatePreferences'])->name('preferences.update');
+        
+        // Child-specific routes
+        Route::prefix('child/{childId}')->name('child.')->group(function () {
+            Route::get('/academic', [SitraController::class, 'childAcademic'])->name('academic');
+            Route::get('/attendance', [SitraController::class, 'childAttendance'])->name('attendance');
+            Route::get('/payments', [SitraController::class, 'payments'])->name('payments');
+            Route::get('/certificates', [SitraController::class, 'certificates'])->name('certificates');
+            Route::get('/schedule', [SitraController::class, 'schedule'])->name('schedule');
+            Route::get('/reports', [SitraController::class, 'reports'])->name('reports');
+            Route::get('/reports/download/{reportType?}', [SitraController::class, 'downloadReport'])->name('reports.download');
+            
+            // Messaging
+            Route::get('/messages', [SitraController::class, 'messages'])->name('messages');
+            Route::get('/conversation/{conversationId}', [SitraController::class, 'conversation'])->name('conversation');
+            Route::post('/message/send', [SitraController::class, 'sendMessage'])->name('message.send');
         });
     });
 

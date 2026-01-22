@@ -1,0 +1,5 @@
+Route::get('/finance/tools', [SintasController::class, 'tools'])->name('finance.tools');
+    Route::get('/sales-marketing/tools', [SintasController::class, 'tools'])->name('sales-marketing.tools');
+    Route::get('/product-rnd/tools', [SintasController::class, 'tools'])->name('product-rnd.tools');
+    Route::get('/pr/tools', [SintasController::class, 'tools'])->name('pr.tools');
+    Route::get('/engagement-retention/tools', [SintasController::class, 'tools'])->name('engagement-retention.tools');

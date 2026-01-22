@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
+use App\Models\Welcomeguest\Article;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
@@ -18,13 +18,13 @@ class ArticleController extends Controller
 
         $articles = $query->paginate(12);
 
-        return view('articles', compact('articles'));
+        return view('welcome.welcomeguest.articles', compact('articles'));
     }
 
     public function show($slug)
     {
         $article = Article::published()->where('slug', $slug)->firstOrFail();
 
-        return view('article-detail', compact('article'));
+        return view('welcome.welcomeguest.article-detail', compact('article'));
     }
 }

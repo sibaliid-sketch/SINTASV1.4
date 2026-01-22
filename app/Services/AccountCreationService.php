@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Registration;
+use App\Models\General\Registration;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -51,16 +51,16 @@ class AccountCreationService
     {
         $accounts = [];
 
-        // Create SIMY account for student (LMS access)
-        $studentAccount = self::createStudentSimyAccount($registration);
-        if ($studentAccount) {
-            $accounts['student'] = $studentAccount;
-        }
-
-        // Create SITRA account for parent (payment & monitoring)
+        // Create SITRA account for parent first (to get parent ID)
         $parentAccount = self::createParentSitraAccount($registration);
         if ($parentAccount) {
             $accounts['parent'] = $parentAccount;
+        }
+
+        // Create SIMY account for student (LMS access) and link to parent
+        $studentAccount = self::createStudentSimyAccount($registration, $parentAccount->id ?? null);
+        if ($studentAccount) {
+            $accounts['student'] = $studentAccount;
         }
 
         return $accounts;
@@ -104,16 +104,16 @@ class AccountCreationService
     {
         $accounts = [];
 
-        // Create SIMY account for student
-        $studentAccount = self::createStudentSimyAccount($registration);
-        if ($studentAccount) {
-            $accounts['student'] = $studentAccount;
-        }
-
-        // Create SITRA account for parent
+        // Create SITRA account for parent first (to get parent ID)
         $parentAccount = self::createParentSitraAccount($registration);
         if ($parentAccount) {
             $accounts['parent'] = $parentAccount;
+        }
+
+        // Create SIMY account for student and link to parent
+        $studentAccount = self::createStudentSimyAccount($registration, $parentAccount->id ?? null);
+        if ($studentAccount) {
+            $accounts['student'] = $studentAccount;
         }
 
         return $accounts;
@@ -122,7 +122,7 @@ class AccountCreationService
     /**
      * Create SIMY account for student (LMS access)
      */
-    private static function createStudentSimyAccount(Registration $registration): User
+    private static function createStudentSimyAccount(Registration $registration, ?int $parentId = null): User
     {
         $password = self::generatePassword();
         $email = $registration->student_email ?? self::generateStudentEmail($registration);
@@ -131,10 +131,11 @@ class AccountCreationService
             'name' => $registration->student_name,
             'email' => $email,
             'password' => Hash::make($password),
-            'role' => 'student',
+            'role' => 'siswa',
             'department' => 'simy',
             'position' => 'student',
             'level' => 'user',
+            'parent_id' => $parentId,
         ]);
 
         $user->generated_password = $password;

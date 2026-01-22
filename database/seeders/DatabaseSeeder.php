@@ -49,6 +49,32 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Admin user (System-wide admin)
+        User::updateOrCreate(
+            ['email' => 'admin@sintasv1.test'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'department' => 'operations',
+                'position' => 'Administrator',
+                'level' => 'Senior',
+            ]
+        );
+
+        // Employee user (General department staff)
+        User::updateOrCreate(
+            ['email' => 'employee@sintasv1.test'],
+            [
+                'name' => 'Employee Test',
+                'password' => Hash::make('password123'),
+                'role' => 'employee',
+                'department' => 'operations',
+                'position' => 'Staff',
+                'level' => 'Junior',
+            ]
+        );
+
         // Admin Operational user (Operational staff - Only operational dashboard)
         User::updateOrCreate(
             ['email' => 'admin.ops@sintasv1.test'],
@@ -161,6 +187,7 @@ class DatabaseSeeder extends Seeder
 
         // Call other seeders
         $this->call([
+            HrSeeder::class,
             ServiceSeeder::class,
             ProgramCsvSeeder::class,
             AttendanceSeeder::class,

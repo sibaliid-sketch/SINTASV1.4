@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Registration;
+use App\Models\General\Registration;
 use Illuminate\Support\Facades\Mail;
 
 class RegistrationEmailService

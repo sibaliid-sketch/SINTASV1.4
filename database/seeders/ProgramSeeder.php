@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Program;
-use App\Models\Schedule;
+use App\Models\General\Program;
+use App\Models\General\Schedule;
 use App\Services\IdGeneratorService;
 use Illuminate\Database\Seeder;
 

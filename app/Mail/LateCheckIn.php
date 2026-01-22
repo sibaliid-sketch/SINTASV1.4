@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Attendance;
+use App\Models\SINTAS\Attendance;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -14,7 +14,7 @@ class LateCheckIn extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $mailer = 'smtp';
+    public $mailer = 'smtp';
 
     public $attendance;
     public $user;

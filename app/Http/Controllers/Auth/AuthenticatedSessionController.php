@@ -29,23 +29,42 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Store redirect URL in session for after welcome page
         $user = Auth::user();
-        $redirectUrl = $this->getRedirectUrlForRole($user->role);
+        $redirectUrl = $this->getRedirectUrlForRole($user);
 
-        return redirect()->intended($redirectUrl ?? RouteServiceProvider::HOME);
+        // Method 1: Store in session
+        $request->session()->put('intended_redirect', $redirectUrl);
+
+        // Method 2: Also pass as query parameter for fallback
+        // This way if session fails, we still have the redirect URL
+        $welcomeRoute = match ($user->role) {
+            'guardian' => 'sitra.welcome',
+            default => 'sintas.welcome',
+        };
+
+        return redirect()
+            ->route($welcomeRoute)
+            ->with('intended_redirect', $redirectUrl);
     }
 
     /**
-     * Get the redirect URL based on user role.
+     * Get the redirect URL based on user role and department.
      */
-    private function getRedirectUrlForRole(string $role): ?string
+    private function getRedirectUrlForRole($user): ?string
     {
-        return match ($role) {
+        $redirectUrl = match ($user->role) {
             'student_under_18', 'student_over_18' => '/simy',
-            'guardian' => '/sitra',
-            'employee' => '/sintas',
-            default => null,
+            'guardian' => '/sitra/welcome',
+            'superadmin' => '/sintas',
+            'admin' => '/departments/operations',
+            'admin_operational' => '/departments/operations',
+            'karyawan', 'employee' => '/sintas/welcome',
+            default => '/sintas',
         };
+
+        // Ensure URL is properly formatted
+        return trim($redirectUrl, '/') ? '/' . trim($redirectUrl, '/') : '/sintas';
     }
 
     /**

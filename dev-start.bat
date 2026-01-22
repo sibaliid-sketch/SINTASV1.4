@@ -62,6 +62,7 @@ echo ║     Admin Ops:  admin.ops@sintasv1.test / password123          ║
 echo ║     User:    test@sintasv1.test / password123                 ║
 echo ║     Manager: manager@sintasv1.test / password123              ║
 echo ║     Eng&Ret: engagement.retention@sintasv1.test / password123 ║
+echo ║     PR:      pr.manager@sintasv1.test / password123           ║
 echo ║                                                                ║
 echo ║  💡 PENTING:                                                   ║
 echo ║     - Biarkan Vite Dev Server tetap running                    ║

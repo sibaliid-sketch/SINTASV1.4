@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Attendance;
+use App\Models\SINTAS\Attendance;
 use Carbon\Carbon;
 
 class AttendanceSeeder extends Seeder

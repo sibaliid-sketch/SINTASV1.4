@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Service;
-use App\Models\Program;
+use App\Models\Welcomeguest\Service;
+use App\Models\General\Program;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\ChatMessage;
+use App\Models\General\ChatMessage;
 use Carbon\Carbon;
 
 class ChatMessageSeeder extends Seeder

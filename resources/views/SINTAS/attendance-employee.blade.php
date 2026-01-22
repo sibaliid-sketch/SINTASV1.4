@@ -5,6 +5,7 @@
         </h2>
     </x-slot>
 
+    @auth
     <div class="py-12 bg-gradient-to-br from-slate-50 via-white to-gray-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
@@ -245,4 +246,7 @@
             </div>
         </div>
     </div>
+    @else
+        <div class="py-12"><div class="max-w-7xl mx-auto sm:px-6 lg:px-8"><div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8"><p class="text-yellow-800">Silakan <a href="{{ route('login') }}" class="text-blue-600 underline font-semibold">login</a> terlebih dahulu.</p></div></div></div>
+    @endauth
 </x-app-layout>

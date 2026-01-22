@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\PaymentProof;
-use App\Models\Registration;
+use App\Models\General\PaymentProof;
+use App\Models\General\Registration;
 use App\Services\AuditLoggerService;
 
 class PaymentVerificationService

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service;
+use App\Models\Welcomeguest\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 

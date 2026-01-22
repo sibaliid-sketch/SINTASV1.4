@@ -4,7 +4,8 @@
             {{ __('SINTAS - Tools (Operations)') }}
         </h2>
     </x-slot>
-
+    @auth
+    @if(auth()->user()->role === 'superadmin' || auth()->user()->role === 'admin' || auth()->user()->role === 'employee' || auth()->user()->role === 'admin_operational' || (auth()->user()->role === 'karyawan' && auth()->user()->department === 'operations'))
     <!-- Include Department Sidebar -->
     @include('SINTAS.operations.operations-sidebar')
 
@@ -157,6 +158,21 @@
                                 <p class="text-gray-700 text-sm mb-4">Create comprehensive reports on operational performance and metrics.</p>
                                 <a href="#" class="text-orange-600 hover:text-orange-700 font-medium text-sm">Access Tool →</a>
                             </div>
+                            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mr-4">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Operations Chat Console</h4>
+                                        <p class="text-sm text-gray-600">Manage chat communications for guests, SIMY, and SITRA</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-sm mb-4">Handle chat communications and support for guest users, SIMY system, and SITRA system.</p>
+                                <a href="{{ route('departments.operations.chat-console') }}" class="text-orange-600 hover:text-orange-700 font-medium text-sm">Access Chat Console →</a>
+                            </div>
                         </div>
                     </div>
 
@@ -294,4 +310,23 @@
             event.target.classList.remove('border-transparent', 'text-gray-500');
         }
     </script>
-</x-app-layout>
+    @else
+        <div class="py-12 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="text-center py-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+                    <p class="text-gray-600 mb-6">You don't have permission to access this page.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+    @else
+        <div class="py-12 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="text-center py-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Please Login</h2>
+                    <p class="text-gray-600 mb-6">You must be logged in to access this page.</p>
+                </div>
+            </div>
+        </div>
+    @endauth</x-app-layout>

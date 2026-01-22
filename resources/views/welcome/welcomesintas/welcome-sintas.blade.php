@@ -1,4 +1,6 @@
 <x-app-layout>
+    @include('components.department-header')
+
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <!-- Hero Section -->
         <div class="relative overflow-hidden">
@@ -102,13 +104,66 @@
 
             <!-- Continue Button -->
             <div class="text-center">
-                <a href="{{ route('sintas') }}" class="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transition-colors duration-200">
+                <button id="continueBtn" class="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200">
                     <span>Mulai Eksplorasi SINTAS</span>
                     <svg class="w-6 h-6 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                     </svg>
-                </a>
+                </button>
             </div>
         </div>
     </div>
+
+    @auth
+    <script>
+        // Get user data from PHP
+        const userRole = '{{ auth()->user()->role }}';
+        const userDepartment = '{{ auth()->user()->department ?? "operations" }}';
+
+        // Determine redirect URL based on user role and department
+        let intendedRedirect = '';
+        switch (userRole) {
+            case 'superadmin':
+                intendedRedirect = '/sintas';
+                break;
+            case 'admin':
+                intendedRedirect = '/departments/operations';
+                break;
+            case 'admin_operational':
+                intendedRedirect = '/departments/operations';
+                break;
+            case 'karyawan':
+            case 'employee':
+                intendedRedirect = '/departments/' + userDepartment;
+                break;
+            default:
+                intendedRedirect = '/sintas';
+        }
+
+        console.log('==== SINTAS Welcome Page Debug ====');
+        console.log('User Role:', userRole);
+        console.log('User Department:', userDepartment);
+        console.log('Calculated Redirect:', intendedRedirect);
+        console.log('=====================================');
+
+        // Handle button click
+        document.addEventListener('DOMContentLoaded', function() {
+            const continueBtn = document.getElementById('continueBtn');
+
+            if (continueBtn) {
+                continueBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Continue button clicked - redirecting to:', intendedRedirect);
+
+                    if (intendedRedirect) {
+                        window.location.href = intendedRedirect;
+                    } else {
+                        console.log('No intendedRedirect available - using fallback');
+                        window.location.href = '/sintas';
+                    }
+                });
+            }
+        });
+    </script>
+    @endauth
 </x-app-layout>

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Service;
-use App\Models\Program;
-use App\Models\Registration;
-use App\Models\Schedule;
-use App\Models\Promo;
-use App\Models\PaymentProof;
+use App\Models\Welcomeguest\Service;
+use App\Models\General\Program;
+use App\Models\General\Registration;
+use App\Models\General\Schedule;
+use App\Models\Welcomeguest\Promo;
+use App\Models\General\PaymentProof;
 use App\Services\IdGeneratorService;
 use App\Services\AuditLoggerService;
 use App\Services\OtpService;
@@ -25,88 +25,132 @@ class RegistrationControllerNew extends Controller
     
     /**
      * Step 1: Who's registering? (Parent or Self)
+     * Shows registration type selection
      */
     public function step1Show()
     {
-        return view('registration.step1-registrar-type');
+        // Clear any existing registration session data
+        session()->forget('registration_data');
+        return view('registration.step1-registrar');
     }
 
+    /**
+     * Submit Step 1 - Registration type selection
+     */
     public function step1Submit(Request $request)
     {
-        $validated = $request->validate([
-            'is_self_register' => 'required|boolean',
-        ]);
+        try {
+            $validated = $request->validate([
+                'is_self_register' => 'required|boolean',
+            ]);
 
-        session(['registration_data' => $validated]);
+            session(['registration_data' => $validated]);
 
-        return redirect()->route('registration.step2');
+            return redirect()->route('registration.step2');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Registration Step 1 Error: ' . $e->getMessage());
+            return back()->withError('Error processing registration type. Please try again.');
+        }
     }
 
     /**
      * Step 2: Class mode (Online or Offline)
+     * Shows education method selection
      */
     public function step2Show()
     {
         if (!session()->has('registration_data.is_self_register')) {
-            return redirect()->route('registration.step1');
+            return redirect()->route('registration.step1')->withError('Please start from the beginning');
         }
 
-        return view('registration.step2-class-mode');
+        return view('registration.step2-education');
     }
 
+    /**
+     * Submit Step 2 - Education mode selection
+     */
     public function step2Submit(Request $request)
     {
-        $validated = $request->validate([
-            'class_mode' => 'required|in:online,offline',
-        ]);
+        try {
+            $validated = $request->validate([
+                'class_mode' => 'required|in:online,offline',
+            ]);
 
-        $data = session('registration_data', []);
-        $data = array_merge($data, $validated);
-        session(['registration_data' => $data]);
+            $data = session('registration_data', []);
+            $data = array_merge($data, $validated);
+            session(['registration_data' => $data]);
 
-        return redirect()->route('registration.step3');
+            return redirect()->route('registration.step3');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Registration Step 2 Error: ' . $e->getMessage());
+            return back()->withError('Error processing class mode. Please try again.');
+        }
     }
 
     /**
      * Step 3: Education level & Class/Semester
+     * Shows education level and class selection
      */
     public function step3Show()
     {
         if (!session()->has('registration_data.class_mode')) {
-            return redirect()->route('registration.step2');
+            return redirect()->route('registration.step2')->withError('Please select class mode first');
         }
 
-        $isSelfRegister = session('registration_data.is_self_register');
-        
-        // Determine available education levels based on registrar type
-        if ($isSelfRegister) {
-            $educationLevels = ['Mahasiswa', 'Umum'];
-        } else {
-            $educationLevels = ['TK', 'SD', 'SMP', 'SMA'];
-        }
+        try {
+            $isSelfRegister = session('registration_data.is_self_register');
+            
+            // Determine available education levels based on registrar type
+            if ($isSelfRegister) {
+                $educationLevels = ['Mahasiswa', 'Umum'];
+            } else {
+                $educationLevels = ['TK', 'SD', 'SMP', 'SMA'];
+            }
 
-        return view('registration.step3-education-level', compact('educationLevels', 'isSelfRegister'));
+            return view('registration.step3-education-level', compact('educationLevels', 'isSelfRegister'));
+            
+        } catch (\Exception $e) {
+            Log::error('Registration Step 3 Show Error: ' . $e->getMessage());
+            return redirect()->route('registration.step2')->withError('Error loading education levels');
+        }
     }
 
+    /**
+     * Submit Step 3 - Education level selection
+     */
     public function step3Submit(Request $request)
     {
-        $validated = $request->validate([
-            'education_level' => 'required|string|in:TK,SD,SMP,SMA,Mahasiswa,Umum',
-            'class_level' => 'nullable|string|max:50',
-        ]);
-
-        // Validate class_level requirement based on education_level
-        if (in_array($validated['education_level'], ['TK', 'SD', 'SMP', 'SMA', 'Mahasiswa'])) {
-            $request->validate([
-                'class_level' => 'required|string|max:50',
+        try {
+            $validated = $request->validate([
+                'education_level' => 'required|string|in:TK,SD,SMP,SMA,Mahasiswa,Umum',
+                'class_level' => 'nullable|string|max:50',
             ]);
+
+            // Validate class_level requirement based on education_level
+            if (in_array($validated['education_level'], ['TK', 'SD', 'SMP', 'SMA', 'Mahasiswa'])) {
+                $request->validate([
+                    'class_level' => 'required|string|max:50',
+                ]);
+            }
+
+            $data = session('registration_data', []);
+            $data = array_merge($data, $validated);
+            session(['registration_data' => $data]);
+
+            return redirect()->route('registration.step4');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Registration Step 3 Error: ' . $e->getMessage());
+            return back()->withError('Error processing education level. Please try again.');
         }
-
-        $data = session('registration_data', []);
-        $data = array_merge($data, $validated);
-        session(['registration_data' => $data]);
-
-        return redirect()->route('registration.step4');
     }
 
     /**
@@ -127,7 +171,7 @@ class RegistrationControllerNew extends Controller
             ->byEducationLevel($sessionData['education_level'])
             ->get();
 
-        return view('registration.step4-service-selection', compact('services'));
+        return view('registration.step4-service-type', compact('services'));
     }
 
     public function step4Submit(Request $request)
@@ -163,7 +207,7 @@ class RegistrationControllerNew extends Controller
 
         $service = Service::find($sessionData['service_id']);
 
-        return view('registration.step5-program-selection', compact('programs', 'service'));
+        return view('registration.step5-program', compact('programs', 'service'));
     }
 
     public function step5Submit(Request $request)
@@ -199,7 +243,7 @@ class RegistrationControllerNew extends Controller
             ->orderBy('start_date')
             ->get();
 
-        return view('registration.step6-schedule-selection', compact('schedules', 'program'));
+        return view('registration.step6-schedule', compact('schedules', 'program'));
     }
 
     public function step6Submit(Request $request)
@@ -235,7 +279,7 @@ class RegistrationControllerNew extends Controller
         $sessionData = session('registration_data');
         $isSelfRegister = $sessionData['is_self_register'];
 
-        return view('registration.step7-personal-data', compact('isSelfRegister'));
+        return view('registration.step7-student-data', compact('isSelfRegister'));
     }
 
     public function step7Submit(Request $request)
@@ -306,7 +350,7 @@ class RegistrationControllerNew extends Controller
             return redirect()->route('registration.step7');
         }
 
-        return view('registration.step8-promo-agreements');
+        return view('registration.step8-promo');
     }
 
     public function step8Submit(Request $request)
@@ -371,7 +415,7 @@ class RegistrationControllerNew extends Controller
         $taxAmount = 0; // Can be calculated if needed
         $totalPrice = $basePrice - $discountAmount + $taxAmount;
 
-        return view('registration.step9-order-summary', compact(
+        return view('registration.step9-confirmation', compact(
             'sessionData',
             'service',
             'program',
@@ -410,7 +454,7 @@ class RegistrationControllerNew extends Controller
      */
     public function step10Show(Registration $registration)
     {
-        return view('registration.step10-payment-portal', compact('registration'));
+        return view('registration.step10-confirmation', compact('registration'));
     }
 
     public function step10Submit(Request $request, Registration $registration)
@@ -493,7 +537,7 @@ class RegistrationControllerNew extends Controller
         // Send all registration emails
         RegistrationEmailService::sendAllRegistrationEmails($registration);
 
-        return view('registration.step11-final-confirmation', compact('registration', 'documents'));
+        return view('registration.step9-confirmation', compact('registration', 'documents'));
     }
 
     /**
@@ -629,7 +673,7 @@ class RegistrationControllerNew extends Controller
             return $registration;
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Registration creation failed: ' . $e->getMessage());
+            Log::error('Registration creation failed: ' . $e->getMessage());
             return null;
         }
     }

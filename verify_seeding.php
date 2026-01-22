@@ -5,8 +5,8 @@ require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
-use App\Models\Service;
-use App\Models\Program;
+use App\Models\Welcomeguest\Service;
+use App\Models\General\Program;
 
 echo "=== Database Seeding Verification ===\n\n";
 

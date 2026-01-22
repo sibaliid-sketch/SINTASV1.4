@@ -110,4 +110,6 @@
             </div>
         </div>
     </div>
+
+    @include('components.admin-chat')
 </x-app-layout>

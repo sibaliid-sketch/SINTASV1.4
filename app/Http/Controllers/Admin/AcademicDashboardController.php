@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service;
-use App\Models\Program;
-use App\Models\Registration;
-use App\Models\Schedule;
+use App\Models\Welcomeguest\Service;
+use App\Models\General\Program;
+use App\Models\General\Registration;
+use App\Models\General\Schedule;
 use Illuminate\Http\Request;
 
 class AcademicDashboardController extends Controller

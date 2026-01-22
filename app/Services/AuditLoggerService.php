@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\AuditLog;
+use App\Models\General\AuditLog;
 use Illuminate\Support\Facades\Auth;
 
 class AuditLoggerService

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Program;
-use App\Models\Service;
+use App\Models\General\Program;
+use App\Models\Welcomeguest\Service;
 use Illuminate\Database\Seeder;
 
 class ProgramDataSeeder extends Seeder

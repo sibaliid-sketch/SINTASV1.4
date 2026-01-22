@@ -22,6 +22,12 @@
             @if(auth()->check())
                 @if(request()->routeIs('departments.*'))
                     @include('components.department-header')
+                @elseif(request()->routeIs('simy.*'))
+                    @include('components.simy-header')
+                @elseif(request()->routeIs('sitra.*'))
+                    @include('components.sitra-header')
+                @elseif(request()->routeIs('sintas.*'))
+                    <!-- SINTAS uses no header for old design -->
                 @else
                     @include('layouts.navigation')
                 @endif

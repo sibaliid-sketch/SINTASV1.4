@@ -13,6 +13,9 @@
         </div>
     </x-slot>
 
+    @auth
+    @if(auth()->user()->role === 'superadmin' || auth()->user()->role === 'admin' || auth()->user()->role === 'employee' || auth()->user()->role === 'admin_operational' || (auth()->user()->role === 'karyawan' && auth()->user()->department === 'sales-marketing'))
+
     <!-- Include Department Sidebar -->
     @include('SINTAS.sales-marketing.sales_marketing-sidebar')
 
@@ -169,4 +172,11 @@
             </div>
         </div>
     </div>
+
+    @else
+        <div class="py-12"><div class="text-center"><h2>Access Denied</h2></div></div>
+    @endif
+    @else
+        <div class="py-12"><div class="text-center"><h2>Please Login</h2></div></div>
+    @endauth
 </x-app-layout>

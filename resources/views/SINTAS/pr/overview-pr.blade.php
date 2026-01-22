@@ -7,6 +7,9 @@
         </h2>
     </x-slot>
 
+    @auth
+    @if(auth()->user()->role === 'superadmin' || auth()->user()->role === 'admin' || auth()->user()->role === 'employee' || auth()->user()->role === 'admin_operational' || (auth()->user()->role === 'karyawan' && auth()->user()->department === 'pr'))
+
     <!-- Include Department Sidebar -->
     @include('SINTAS.pr.pr-sidebar')
 
@@ -134,50 +137,7 @@
             </div>
             @endif
 
-            <!-- Attendance Data Section -->
-            <div class="bg-white/60 backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl border border-gray-200/50 mb-8">
-                <div class="p-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Recent Attendance Records</h3>
 
-                    @if($attendances->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PIN</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Raw Data</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($attendances as $attendance)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $attendance->pin }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->date_time->format('d/m/Y H:i:s') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $attendance->device_id }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ json_encode($attendance->raw_payload) }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Pagination -->
-                        <div class="mt-6">
-                            {{ $attendances->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No attendance data available</h3>
-                            <p class="mt-1 text-sm text-gray-500">Attendance records will appear here once the Fingerspot API integration is active.</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
 
             <!-- Performance Chart Placeholder -->
             <div class="bg-white/60 backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl border border-gray-200/50">
@@ -194,4 +154,23 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+    @else
+        <div class="py-12 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="text-center py-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+                    <p class="text-gray-600 mb-6">You don't have permission to access this page.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+    @else
+        <div class="py-12 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="text-center py-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Please Login</h2>
+                    <p class="text-gray-600 mb-6">You must be logged in to access this page.</p>
+                </div>
+            </div>
+        </div>
+    @endauth</x-app-layout>
